@@ -117,7 +117,7 @@ Entities are your Object3Ds. Queries are cached and live, systems run in order w
 npx orreryjs doctor
 ```
 
-Checks that three is installed and new enough, that there is only one copy of three, that every `three/addons` import in your code still exists (with the replacement for renamed ones, such as RGBELoader to HDRLoader), that `@types/three` matches, and that Orrery packages are aligned. Exits non-zero on problems, `--json` for CI.
+Checks that three is installed and new enough, that there is only one copy of three, that every `three/addons` import in your code still exists (with the replacement for renamed ones, such as RGBELoader to HDRLoader), that `@types/three` matches, and that Orrery packages are aligned. Exits non-zero on problems, `--json` for CI. Add `// orreryjs-doctor-ignore-file` to a file to skip it.
 
 ## Roadmap
 

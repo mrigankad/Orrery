@@ -9,6 +9,7 @@
     "test": "npm test --workspaces --if-present",
     "typecheck": "npm run typecheck -w orreryjs",
     "dev": "node scripts/serve.mjs",
-    "doctor": "node packages/core/bin/orreryjs.js doctor"
+    "doctor": "node packages/core/bin/orreryjs.js doctor",
+    "ci:doctor": "node packages/core/bin/orreryjs.js doctor"
   }
 }

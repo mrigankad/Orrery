@@ -149,6 +149,7 @@ function runDoctor( root ) {
 
 			let code;
 			try { code = readFileSync( file, 'utf8' ); } catch { continue; }
+			if ( code.includes( 'orreryjs-doctor-ignore-file' ) ) continue;
 			for ( const path of addonImports( code ) ) {
 
 				scanned ++;

@@ -1,3 +1,4 @@
+// orreryjs-doctor-ignore-file: these tests contain deliberately broken import strings.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
@@ -42,7 +43,9 @@ test( 'a broken project: old three, a duplicate copy, a removed addon, mismatche
 		'node_modules/orreryjs/package.json': { version: '0.1.0' },
 		'node_modules/@orreryjs/ui/package.json': { version: '0.2.0' },
 		'src/main.js': `import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';\nimport { RGBELoader } from 'three/addons/loaders/RGBELoader.js';`,
-		'node_modules/ignored/index.js': `import 'three/addons/not/scanned.js'`
+		'node_modules/ignored/index.js': `import 'three/addons/not/scanned.js'`,
+		'src/fixtures.js': `// orreryjs-doctor-ignore-file
+import 'three/addons/also/skipped.js'`
 	} );
 
 	try {
@@ -59,6 +62,7 @@ test( 'a broken project: old three, a duplicate copy, a removed addon, mismatche
 		assert.match( addons.title, /^1 addon import no longer exists/ );
 		assert.match( addons.detail, /RGBELoader\.js +-> +use loaders\/HDRLoader\.js/ );
 		assert.doesNotMatch( addons.detail, /scanned/, 'node_modules is not scanned' );
+		assert.doesNotMatch( addons.detail, /skipped/, 'files can opt out' );
 
 		const text = formatReport( report );
 		assert.match( text, /fail {2}3 copies|fail {2}2 copies/ );
