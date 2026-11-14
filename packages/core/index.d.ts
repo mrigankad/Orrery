@@ -226,3 +226,7 @@ export interface World {
 	readonly resolutionScale: number;
 	optimize( root?: Object3D, options?: { minCount?: number; skip?: ( mesh: Object3D ) => boolean } ): InstanceReport;
 }
+export interface World {
+	emit( object: Object3D, type: WorldPointerEvent, hit?: Intersection | null ): void;
+	hasListener( object: Object3D, type?: WorldPointerEvent ): boolean;
+}

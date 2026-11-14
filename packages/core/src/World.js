@@ -335,6 +335,34 @@ class World extends SceneApp {
 
 	}
 
+	/**
+	 * Fires a pointer event on an object as if it came from the pointer, for
+	 * keyboard access and tests. `hit` is null when there is no raycast.
+	 *
+	 * @param {Object3D} object
+	 * @param {string} type - One of the world.on() event types.
+	 * @param {?Object} [hit=null]
+	 */
+	emit( object, type, hit = null ) {
+
+		this._emit( object, type, hit );
+
+	}
+
+	/**
+	 * Whether an object (or an ancestor) has a handler for an event type.
+	 *
+	 * @param {Object3D} object
+	 * @param {string} [type='click']
+	 * @return {boolean}
+	 */
+	hasListener( object, type = 'click' ) {
+
+		for ( let n = object; n; n = n.parent ) if ( this._handlers.get( n )?.[ type ]?.size ) return true;
+		return false;
+
+	}
+
 	_emit( object, type, hit ) {
 
 		const set = object && this._handlers.get( object )?.[ type ];

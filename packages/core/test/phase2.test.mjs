@@ -15,9 +15,10 @@ test( 'adaptive resolution steps down when slow, back up when fast, ignores hitc
 	assert.equal( feed( 30, 4 ), null, 'clamped at min' );
 	assert.equal( feed( 1000, 20 ), null, 'hitches over 250ms are ignored' );
 	assert.equal( a.scale, 0.5 );
-	assert.equal( feed( 16, 4 ), null, 'on budget: hold' );
-	assert.equal( feed( 8, 4 ), 0.75 );
-	assert.equal( feed( 8, 8 ), 1 );
+	assert.equal( feed( 16.6, 12 ), null, 'cooldown: 3 windows before raising' );
+	assert.equal( feed( 16.6, 4 ), 0.75, 'vsync-locked 60 Hz counts as headroom' );
+	assert.equal( feed( 16.6, 4 ), 1 );
+	assert.equal( feed( 16.6, 4 ), null, 'clamped at max' );
 
 } );
 
@@ -63,5 +64,22 @@ test( 'world.optimize leaves meshes with events alone; adaptive scale drives the
 	world._resize._measure = () => ( { width: 100, height: 100 } );
 	world._tick( 0.05, 0.05 ); world._tick( 0.05, 0.1 );
 	assert.equal( world.resolutionScale, 0.75 );
+	for ( let i = 0; i < 10; i ++ ) world._tick( 1 / 60, 0 );
+	assert.equal( world.resolutionScale, 1, 'climbs back once frames are on budget' );
+
+} );
+
+test( 'the canvas keeps its CSS size when the pixel ratio changes (retina, adaptive)', async () => {
+
+	const { ResizeManager } = await import( '../src/ResizeManager.js' );
+	const canvas = { style: {} };
+	const renderer = { domElement: canvas, setPixelRatio( r ) { this.ratio = r; }, setSize( w, h ) { canvas.width = w * this.ratio; canvas.height = h * this.ratio; } };
+	const camera = { aspect: 1, updateProjectionMatrix() {} };
+	const rm = new ResizeManager( { container: null, camera, renderer }, { measure: () => ( { width: 800, height: 400 } ) } );
+	rm.scale = 0.5;
+	rm.update();
+	assert.equal( canvas.width, 400 * ( globalThis.devicePixelRatio ?? 1 ), 'backing store follows the scale' );
+	assert.equal( canvas.style.width, '800px', 'but it still fills the container' );
+	assert.equal( canvas.style.height, '400px' );
 
 } );

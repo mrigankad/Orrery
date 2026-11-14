@@ -67,7 +67,18 @@ class ResizeManager {
 		this.camera.updateProjectionMatrix();
 
 		this.renderer.setPixelRatio( pixelRatio );
+		// Keep the canvas's CSS size equal to the container. Without this the
+		// canvas displays at its backing size, which is wrong whenever the
+		// pixel ratio is not 1 (retina screens, adaptive resolution).
 		this.renderer.setSize( width, height, false );
+		const canvas = this.renderer.domElement;
+		if ( canvas && canvas.style ) {
+
+			canvas.style.width = `${ width }px`;
+			canvas.style.height = `${ height }px`;
+			canvas.style.display = 'block';
+
+		}
 
 		return this;
 

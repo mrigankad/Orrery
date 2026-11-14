@@ -38,7 +38,8 @@
 			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
 			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
 			"orreryjs": "../packages/core/src/index.js",
-			"@orreryjs/devtools": "../packages/devtools/src/index.js"
+			"@orreryjs/devtools": "../packages/devtools/src/index.js",
+			"@orreryjs/ui": "../packages/ui/src/index.js"
 		} }
 	</script>
 </head>
@@ -54,7 +55,7 @@
 			<div><strong id="tex">0</strong><small>textures</small></div>
 		</div>
 		<div class="row"><button id="add" class="primary">Add planet</button><button id="remove">Remove last</button></div>
-		<div class="row"><button id="belt">Instance the belt</button></div>
+		<div class="row"><button id="belt">Instance the belt</button><button id="labels" style="flex:none;padding:10px 16px">Labels on</button></div>
 		<button id="dev" style="flex:none">Open devtools  ·  press `</button>
 		<p>Remove uses <b>world.remove()</b>, which also frees GPU memory. Watch the geometry count drop.</p>
 	</div>
@@ -63,6 +64,7 @@
 		import { DodecahedronGeometry, SRGBColorSpace, CanvasTexture, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, SphereGeometry, DoubleSide } from 'three';
 		import { World, addOrbitControls } from 'orreryjs';
 		import { mountDevtools } from '@orreryjs/devtools';
+		import { createUI } from '@orreryjs/ui';
 
 		const forced = new URLSearchParams( location.search ).get( 'renderer' ); // ?renderer=webgl | webgl2
 		const world = await World.create( { container: document.querySelector( '#app' ), renderer: forced ?? 'auto', adaptive: true } );
@@ -76,6 +78,16 @@
 		const sun = new Mesh( new SphereGeometry( 1.1, 48, 32 ), new MeshStandardMaterial( { color: 0xff4f1a, emissive: 0xff4f1a, emissiveIntensity: 0.25, roughness: 0.5 } ) );
 		sun.name = 'Sun';
 		world.add( sun );
+
+		const ui = createUI( world );
+		const sunCard = document.createElement( 'div' );
+		sunCard.innerHTML = '<div style="font-size:10px;letter-spacing:.12em;color:#FF4F1A;font-weight:600">STAR</div><div style="font:700 22px Urbanist,sans-serif;letter-spacing:-.02em">Sun</div><div style="font-size:12px;color:#5C5C63;max-width:180px">Click a planet, or press Tab to move through them.</div>';
+		ui.pin( sun, sunCard, { anchor: 'right', gap: 18 } );
+		ui.accessible( sun, 'Sun' );
+		const title = ui.text( 'orrery', { size: 0.9, color: '#121214' } );
+		title.position.set( 0, -0.02, 7.2 );
+		title.rotation.x = - Math.PI / 2;
+		world.add( title );
 
 		const COLORS = [ 0x121214, 0x5c5c63, 0xff8a5c, 0x2b2b30, 0xb9b9c0, 0xff4f1a, 0x3a3a40, 0x8a8a90 ];
 		const NAMES = [ 'Kepler', 'Halley', 'Vesta', 'Ceres', 'Juno', 'Pallas', 'Hygiea', 'Astraea' ];
@@ -111,6 +123,8 @@
 			world.on( planet, 'pointerenter', () => planet.scale.setScalar( 1.35 ) );
 			world.on( planet, 'pointerleave', () => planet.scale.setScalar( 1 ) );
 			world.on( planet, 'click', () => { focusEl.textContent = planet.name; } );
+			ui.pin( planet, planet.name, { fade: { near: 14, far: 30 }, occlude: true } );
+			ui.accessible( planet, planet.name );
 			planets.push( system );
 			refresh();
 		}
@@ -160,6 +174,12 @@
 		};
 
 		world.on( sun, 'click', () => { focusEl.textContent = 'Sun'; } );
+		const labelsBtn = document.querySelector( '#labels' );
+		labelsBtn.onclick = () => {
+			const off = ui.layer.style.display !== 'none';
+			ui.layer.style.display = off ? 'none' : '';
+			labelsBtn.textContent = off ? 'Labels off' : 'Labels on';
+		};
 		document.querySelector( '#add' ).onclick = addPlanet;
 		document.querySelector( '#remove' ).onclick = removePlanet;
 		for ( let i = 0; i < 5; i ++ ) addPlanet();
@@ -177,6 +197,7 @@
 		window.addEventListener( 'keydown', ( e ) => { if ( e.key === '`' ) setTimeout( syncDevBtn ); } );
 		syncDevBtn();
 		window.devtools = devtools;
+		window.ui = ui;
 		window.world = world; // for debugging in the console
 	</script>
 </body>

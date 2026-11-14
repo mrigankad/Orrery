@@ -28,12 +28,13 @@ function createAdaptiveResolution( options = {} ) {
 
 	let scale = max;
 	let samples = [];
+	let cooldown = 0;   // windows to wait after a drop before trying to raise
 
 	return {
 
 		get scale() { return scale; },
 
-		reset() { scale = max; samples = []; },
+		reset() { scale = max; samples = []; cooldown = 0; },
 
 		/**
 		 * @param {number} ms - Duration of the last frame.
@@ -49,9 +50,24 @@ function createAdaptiveResolution( options = {} ) {
 			const avg = samples.reduce( ( a, b ) => a + b, 0 ) / samples.length;
 			samples = [];
 
+			// On a vsync-locked display frames never beat the refresh interval,
+			// so "on budget" counts as headroom. A cooldown after each drop stops
+			// the scale flipping between two levels.
 			let next = scale;
-			if ( avg > budgetMs * 1.2 ) next = Math.max( min, scale - step );
-			else if ( avg < budgetMs * 0.75 ) next = Math.min( max, scale + step );
+			if ( avg > budgetMs * 1.2 ) {
+
+				next = Math.max( min, scale - step );
+				cooldown = 3;
+
+			} else if ( cooldown > 0 ) {
+
+				cooldown --;
+
+			} else if ( avg <= budgetMs * 1.05 ) {
+
+				next = Math.min( max, scale + step );
+
+			}
 
 			if ( next === scale ) return null;
 			scale = next;

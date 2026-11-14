@@ -79,6 +79,20 @@ world.remove( crate );                           // the body goes with it
 
 Fixed-step simulation inside the world loop, automatic shapes (ball, cuboid, capsule, convex hull, or exact triangles for static meshes), nested parents handled, raycasts and teleports. Try the [physics demo](https://mrigankad.github.io/Orrery/examples/physics.html).
 
+## Labels, keyboard access and text
+
+```js
+import { createUI } from '@orreryjs/ui';
+
+const ui = createUI( world );
+ui.pin( planet, 'Juno', { fade: { near: 14, far: 30 }, occlude: true } ); // HTML chip that follows it
+ui.pin( sun, cardElement, { anchor: 'right' } );                         // any HTML
+ui.accessible( planet, 'Juno' );          // Tab reaches it, Enter fires world.on( planet, 'click' )
+world.add( ui.text( 'orrery' ) );         // text as a mesh, WebGPU and WebGL
+```
+
+Labels are real DOM: sharp at any zoom, readable by screen readers, sorted by depth, dimmed when something is in front. On the [demo](https://mrigankad.github.io/Orrery/), press Tab to move through the planets.
+
 ## Roadmap
 
 <p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: orreryjs core. Next: @orreryjs/devtools with a scene inspector, perf HUD, GPU memory view and upgrade codemods. Then: physics, UI and ECS packages. And: React, Svelte and Vue bindings with a docs site and a starter."></p>
@@ -88,7 +102,7 @@ Fixed-step simulation inside the world loop, automatic shapes (ball, cuboid, cap
 ```sh
 npm install
 npm run dev        # demo on http://127.0.0.1:5173  (?renderer=webgl2 or ?renderer=webgl)
-npm test           # node --test, 41 tests across three packages (physics runs real Rapier)
+npm test           # node --test, 47 tests across four packages (physics runs real Rapier)
 npm run typecheck
 ```
 
