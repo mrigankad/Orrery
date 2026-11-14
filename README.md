@@ -14,6 +14,9 @@
   <a href="#roadmap">Roadmap</a>
 </p>
 
+<p align="center"><img src="docs/readme/demo.gif" width="100%" alt="The Orrery demo in motion: the cursor hovers and clicks a planet (Vesta is selected in the panel), Tab moves an orange focus ring across planets, Instance the belt folds 300 asteroids into one draw call, and the devtools panel opens showing 60 fps, GPU memory and the scene tree. Recorded with AiEmcee."></p>
+<p align="center"><sub>Recorded with <a href="https://github.com/mrigankad/AiEmcee">AiEmcee</a> from the <a href="https://mrigankad.github.io/Orrery/examples/">live demo</a>.</sub></p>
+
 <p align="center"><img src="docs/readme/02-before-after.png" alt="Before and after. Plain three.js needs 29 lines for a lit, resizable, clickable cube and still leaks GPU memory on scene.remove. Orrery does it in 9 lines with World.create, world.on and world.remove: lit by default, WebGPU with a WebGL 2 fallback, resize and tone mapping handled, and remove frees geometry, materials and textures."></p>
 
 <p align="center"><img src="docs/readme/03-load-gpu.png" alt="One load for every file and the best GPU path picked for you. world.load picks the loader from the extension: glb and gltf with Draco, KTX2 and Meshopt wired in, ktx2 Basis textures, hdr environments, and png, jpg or webp textures in sRGB, with aggregate progress. World.create uses WebGPU when the browser supports it, falls back to WebGL 2 automatically, and new World gives the classic WebGL renderer."></p>
