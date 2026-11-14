@@ -1,10 +1,17 @@
-<p align="center"><img src="brand/mark.svg" width="96" alt="Orrery" /></p>
+<p align="center"><img src="docs/readme/01-hero.png" alt="Orrery, batteries for three.js. Headline: Wind up a world. Watch it run. A small layer on three.js that lights your scene, frees GPU memory, gives objects click events and runs on WebGPU with WebGL as a fallback. Install with npm i orreryjs three. Beside it, a live render of the Orrery demo: an orange sun with planets on orbit rings."></p>
 
-<h1 align="center">orrery</h1>
+<p align="center">
+  <a href="https://mrigankad.github.io/Orrery/"><b>Live demo</b></a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#api">API</a> ·
+  <a href="#roadmap">Roadmap</a>
+</p>
 
-<p align="center"><b>Batteries for three.js.</b> Wind up a world. Watch it run.</p>
+<p align="center"><img src="docs/readme/02-before-after.png" alt="Before and after. Plain three.js needs 29 lines for a lit, resizable, clickable cube and still leaks GPU memory on scene.remove. Orrery does it in 9 lines with World.create, world.on and world.remove: lit by default, WebGPU with a WebGL 2 fallback, resize and tone mapping handled, and remove frees geometry, materials and textures."></p>
 
-Orrery is a small layer on top of [three.js](https://github.com/mrdoob/three.js) that removes the usual traps: setup boilerplate, scenes that render black, GPU memory leaks, and hand-rolled raycasting. three is a **peer dependency**, so you keep using it directly and upstream releases are a version bump, not a merge.
+<p align="center"><img src="docs/readme/03-load-gpu.png" alt="One load for every file and the best GPU path picked for you. world.load picks the loader from the extension: glb and gltf with Draco, KTX2 and Meshopt wired in, ktx2 Basis textures, hdr environments, and png, jpg or webp textures in sRGB, with aggregate progress. World.create uses WebGPU when the browser supports it, falls back to WebGL 2 automatically, and new World gives the classic WebGL renderer."></p>
+
+## Quick start
 
 ```sh
 npm i orreryjs three
@@ -14,7 +21,7 @@ npm i orreryjs three
 import { BoxGeometry, Mesh, MeshStandardMaterial } from 'three';
 import { World } from 'orreryjs';
 
-const world = new World( { container: document.querySelector( '#app' ) } );
+const world = await World.create( { container: document.querySelector( '#app' ) } );
 
 const cube = new Mesh( new BoxGeometry(), new MeshStandardMaterial( { color: 0xff4f1a } ) );
 world.add( cube );
@@ -22,38 +29,44 @@ world.add( cube );
 world.on( cube, 'click', () => world.remove( cube ) ); // detaches and frees GPU memory
 world.onUpdate( ( dt ) => { cube.rotation.y += dt; } );
 world.start();
+
+const city = await world.load( 'city.glb' ); // Draco, KTX2 and Meshopt ready
+world.add( city.scene );
 ```
 
-## What `World` gives you
+If you use three's WebGPU build through an import map, also map `three/webgpu`. The [demo](examples/index.html) shows a working import map.
 
-| Trap in plain three.js | Orrery default |
+## API
+
+| | |
 | --- | --- |
-| About 40 lines of renderer, camera, resize and loop setup | `new World()` |
-| PBR materials render black with no light | Studio lights and a room environment, plus a console hint if a scene is unlit |
-| Colour space and tone mapping confusion | ACES filmic and sRGB output |
-| `scene.remove()` leaks geometries, materials and textures | `world.remove(obj)` frees them |
-| No events on objects | `world.on(obj, 'click' \| 'pointerenter' \| 'pointerleave' \| 'pointerdown' \| 'pointerup', fn)` |
+| `await World.create(config)` | WebGPU by default, WebGL 2 fallback built in. `renderer: 'auto' \| 'webgl2' \| 'webgl'` |
+| `new World(config)` | Same World on the classic WebGL renderer, created synchronously |
+| `world.backend` | `'webgpu'`, `'webgl2'` or `'webgl'` |
+| `world.add(...objects)` / `world.remove(obj)` | `remove` detaches and disposes geometry, materials and textures |
+| `world.on(obj, type, fn)` | `click`, `pointerenter`, `pointerleave`, `pointerdown`, `pointerup`; returns an unsubscribe |
+| `world.load(url)` | glTF/GLB, KTX2, HDR, PNG/JPG/WebP. Cached by URL |
+| `world.assets.onProgress(fn)` | `{ url, loaded, total, done }` across every load |
+| `world.onUpdate(fn)` / `start()` / `stop()` / `dispose()` | Frame loop and lifecycle |
+| Config | `lights: 'studio' \| 'none'`, `environment: 'room' \| 'none'`, `toneMapping`, `warnings`, `fov`, `near`, `far` |
 
-Plus the helpers carried over from three.js Ascended: `addOrbitControls`, `loadGLTF` (with Draco), `loadTexture`, `setEnvironment` (HDR), `memoizeLoader`, `screenshot`, `addStats`, `addPicking`, `loadAudio`, `Loop`, `ResizeManager`, `disposeObject`, `SceneApp`.
-
-## Try the demo
-
-```sh
-npm install
-npm run dev        # http://127.0.0.1:5173
-npm test           # node --test
-npm run typecheck
-```
+Also exported: `createAssetLoader`, `addOrbitControls`, `loadGLTF`, `loadTexture`, `setEnvironment`, `memoizeLoader`, `screenshot`, `addStats`, `addPicking`, `loadAudio`, `disposeObject`, `Loop`, `ResizeManager`, `SceneApp`. Types ship in `index.d.ts`.
 
 ## Roadmap
 
-| Phase | Scope |
-| --- | --- |
-| 0 · now | Rename from three.js Ascended, unfork, `World`, tests |
-| 1 | WebGPU renderer with WebGL2 fallback, one `load()` for Draco, KTX2 and Meshopt |
-| 2 | `@orreryjs/devtools`: inspector, perf HUD, GPU memory view; codemods per three release |
-| 3 | `@orreryjs/physics` (Rapier), `@orreryjs/ui`, `@orreryjs/ecs`, React, Svelte and Vue bindings |
+<p align="center"><img src="docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: orreryjs core. Next: @orreryjs/devtools with a scene inspector, perf HUD, GPU memory view and upgrade codemods. Then: physics, UI and ECS packages. And: React, Svelte and Vue bindings with a docs site and a starter."></p>
+
+## Develop
+
+```sh
+npm install
+npm run dev        # demo on http://127.0.0.1:5173  (?renderer=webgl2 or ?renderer=webgl)
+npm test           # node --test, 25 tests
+npm run typecheck
+```
+
+A test checks that every `three/addons` file Orrery imports still exists in the installed three, so an upstream rename fails CI instead of failing users.
 
 ## Credit
 
-Orrery is an independent project built on three.js. It is not affiliated with or endorsed by the three.js project. All credit for three.js goes to [mrdoob](https://github.com/mrdoob) and its contributors. MIT licensed.
+Orrery is an independent project built on [three.js](https://github.com/mrdoob/three.js). It is not affiliated with or endorsed by the three.js project. All credit for three.js goes to [mrdoob](https://github.com/mrdoob) and its contributors. MIT licensed.
