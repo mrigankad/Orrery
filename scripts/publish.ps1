@@ -5,7 +5,8 @@ Set-Location (Join-Path $PSScriptRoot '..')
 
 Write-Host "`nOrrery publish  (npm user: $(npm whoami))`n" -ForegroundColor Cyan
 
-$packages = '@orreryjs/core', '@orreryjs/devtools', '@orreryjs/physics', '@orreryjs/ui', '@orreryjs/ecs', '@orreryjs/react', '@orreryjs/create'
+# Pass package names to publish only those: .\scripts\publish.ps1 @orreryjs/vue @orreryjs/svelte
+$packages = if ($args.Count) { $args } else { '@orreryjs/core', '@orreryjs/devtools', '@orreryjs/physics', '@orreryjs/ui', '@orreryjs/ecs', '@orreryjs/react', '@orreryjs/vue', '@orreryjs/svelte', '@orreryjs/create' }
 $results = @()
 
 foreach ($p in $packages) {
