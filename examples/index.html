@@ -14,7 +14,9 @@
 		header { position: fixed; top: 24px; left: 28px; display: flex; align-items: center; gap: 10px; pointer-events: none; }
 		header img { width: 30px; height: 30px; }
 		header b { font-family: Urbanist, sans-serif; font-size: 26px; letter-spacing: -0.03em; }
-		header span { font-size: 13px; color: var(--body); margin-left: 6px; }
+		header nav { display: flex; gap: 4px; margin-left: 12px; }
+		header nav a { font-size: 13px; color: var(--body); text-decoration: none; padding: 6px 10px; border-radius: 999px; pointer-events: auto; }
+		header nav a[aria-current] { background: var(--sheet); color: var(--ink); font-weight: 500; }
 		header em { font-style: normal; font: 600 11px 'Inter Tight', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--sun); background: #FFE9E1; padding: 4px 8px; border-radius: 999px; }
 		#panel { position: fixed; left: 28px; bottom: 28px; width: 300px; background: var(--paper); border: 1px solid var(--rule); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 40px rgba(18,18,20,.08); }
 		.eyebrow { font-size: 11px; letter-spacing: .12em; color: var(--sun); font-weight: 600; text-transform: uppercase; }
@@ -28,7 +30,7 @@
 		button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
 		button:disabled { opacity: .4; cursor: default; }
 		p { margin: 0; font-size: 13px; line-height: 19px; color: var(--body); }
-		@media (max-width: 480px) { #panel { left: 16px; right: 16px; width: auto; bottom: 16px; } header { left: 16px; top: 16px; } }
+		@media (max-width: 480px) { #panel { left: 16px; right: 16px; width: auto; bottom: 16px; } header { left: 16px; top: 16px; } header nav { display: none; } }
 	</style>
 	<script type="importmap">
 		{ "imports": {
@@ -42,7 +44,7 @@
 </head>
 <body>
 	<div id="app"></div>
-	<header><img src="../brand/mark.svg" alt="" /><b>orrery</b><span>demo · three r184</span><em id="backend">…</em></header>
+	<header><img src="../brand/mark.svg" alt="" /><b>orrery</b><nav><a href="index.html" aria-current="page">Orrery</a><a href="physics.html">Physics</a></nav><em id="backend">…</em></header>
 	<div id="panel">
 		<div class="eyebrow">Click a planet</div>
 		<div id="focus">Sun</div>

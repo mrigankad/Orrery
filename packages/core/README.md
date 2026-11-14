@@ -64,6 +64,21 @@ mountDevtools( world );   // ` toggles, Alt+click selects in the scene
 
 A frame graph with a budget line, draw call and triangle budgets, GPU memory with a leak check (geometries that left the scene without `dispose()`), a live scene tree and an inspector. Try it on the [demo](https://mrigankad.github.io/Orrery/examples/?devtools).
 
+## Physics
+
+```js
+import { addPhysics } from '@orreryjs/physics';
+
+const physics = await addPhysics( world );        // Rapier, loaded on first use
+physics.add( floor, { type: 'fixed' } );          // collider from the mesh's geometry
+physics.add( crate );                            // dynamic box
+physics.onCollision( crate, ( other, started ) => started && console.log( other.name ) );
+world.on( crate, 'click', () => physics.applyImpulse( crate, [ 0, 6, 0 ] ) );
+world.remove( crate );                           // the body goes with it
+```
+
+Fixed-step simulation inside the world loop, automatic shapes (ball, cuboid, capsule, convex hull, or exact triangles for static meshes), nested parents handled, raycasts and teleports. Try the [physics demo](https://mrigankad.github.io/Orrery/examples/physics.html).
+
 ## Roadmap
 
 <p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: orreryjs core. Next: @orreryjs/devtools with a scene inspector, perf HUD, GPU memory view and upgrade codemods. Then: physics, UI and ECS packages. And: React, Svelte and Vue bindings with a docs site and a starter."></p>
@@ -73,7 +88,7 @@ A frame graph with a budget line, draw call and triangle budgets, GPU memory wit
 ```sh
 npm install
 npm run dev        # demo on http://127.0.0.1:5173  (?renderer=webgl2 or ?renderer=webgl)
-npm test           # node --test, 35 tests across both packages
+npm test           # node --test, 41 tests across three packages (physics runs real Rapier)
 npm run typecheck
 ```
 

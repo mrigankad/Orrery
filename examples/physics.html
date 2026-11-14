@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Orrery · physics</title>
+	<link rel="icon" href="../brand/favicon.svg" type="image/svg+xml" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet" />
+	<style>
+		:root { --sun: #FF4F1A; --ink: #121214; --body: #5C5C63; --paper: #FFFFFF; --sheet: #F6F6F4; --rule: #E8E7E3; }
+		html, body { margin: 0; height: 100%; background: var(--paper); color: var(--ink); font-family: 'Inter Tight', system-ui, sans-serif; overflow: hidden; }
+		#app { position: fixed; inset: 0; }
+		header { position: fixed; top: 24px; left: 28px; display: flex; align-items: center; gap: 10px; }
+		header img { width: 30px; height: 30px; }
+		header b { font-family: Urbanist, sans-serif; font-size: 26px; letter-spacing: -0.03em; }
+		header nav { display: flex; gap: 4px; margin-left: 12px; }
+		header nav a { font-size: 13px; color: var(--body); text-decoration: none; padding: 6px 10px; border-radius: 999px; }
+		header nav a[aria-current] { background: var(--sheet); color: var(--ink); font-weight: 500; }
+		header em { font-style: normal; font: 600 11px 'Inter Tight', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--sun); background: #FFE9E1; padding: 4px 8px; border-radius: 999px; }
+		#panel { position: fixed; left: 28px; bottom: 28px; width: 300px; background: var(--paper); border: 1px solid var(--rule); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 40px rgba(18,18,20,.08); }
+		.eyebrow { font-size: 11px; letter-spacing: .12em; color: var(--sun); font-weight: 600; text-transform: uppercase; }
+		h1 { margin: 0; font-family: Urbanist, sans-serif; font-size: 30px; line-height: 1; letter-spacing: -0.02em; }
+		.stats { display: flex; gap: 20px; }
+		.stats div { display: flex; flex-direction: column; gap: 2px; }
+		.stats strong { font-family: Urbanist, sans-serif; font-size: 26px; }
+		.stats small { font-size: 12px; color: var(--body); }
+		.row { display: flex; gap: 8px; }
+		button { flex: 1; font: 500 13px 'Inter Tight', sans-serif; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); cursor: pointer; }
+		button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+		p { margin: 0; font-size: 13px; line-height: 19px; color: var(--body); }
+		@media (max-width: 480px) { #panel { left: 16px; right: 16px; width: auto; bottom: 16px; } header { left: 16px; top: 16px; } header nav { display: none; } }
+	</style>
+	<script type="importmap">
+		{ "imports": {
+			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
+			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			"@dimforge/rapier3d-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.21.0/dist/rapier.mjs",
+			"orreryjs": "../packages/core/src/index.js",
+			"@orreryjs/devtools": "../packages/devtools/src/index.js",
+			"@orreryjs/physics": "../packages/physics/src/index.js"
+		} }
+	</script>
+</head>
+<body>
+	<div id="app"></div>
+	<header><img src="../brand/mark.svg" alt="" /><b>orrery</b>
+		<nav><a href="index.html">Orrery</a><a href="physics.html" aria-current="page">Physics</a></nav>
+		<em id="backend">…</em></header>
+	<div id="panel">
+		<div class="eyebrow">@orreryjs/physics</div>
+		<h1 id="status">Click a toy to kick it</h1>
+		<div class="stats">
+			<div><strong id="bodies">0</strong><small>bodies</small></div>
+			<div><strong id="hits">0</strong><small>collisions</small></div>
+			<div><strong id="geo">0</strong><small>geometries</small></div>
+		</div>
+		<div class="row"><button id="drop" class="primary">Drop 12 toys</button><button id="clear">Clear toys</button></div>
+		<button id="dev">Open devtools · press `</button>
+		<p>Colliders come from each mesh's geometry. world.remove() takes the body with it.</p>
+	</div>
+
+	<script type="module">
+		import { BoxGeometry, DodecahedronGeometry, Mesh, MeshStandardMaterial, SphereGeometry } from 'three';
+		import { World, addOrbitControls } from 'orreryjs';
+		import { addPhysics } from '@orreryjs/physics';
+		import { mountDevtools } from '@orreryjs/devtools';
+
+		const forced = new URLSearchParams( location.search ).get( 'renderer' );
+		const world = await World.create( { container: document.querySelector( '#app' ), renderer: forced ?? 'auto', adaptive: true } );
+		document.querySelector( '#backend' ).textContent = { webgpu: 'WebGPU', webgl2: 'WebGL 2 fallback', webgl: 'WebGL' }[ world.backend ];
+		world.renderer.setClearColor( 0xffffff, 0 );
+		world.camera.position.set( 0, 11, 15.5 );
+		world.camera.lookAt( 0, 0, 0 );
+		await addOrbitControls( world, { target: { x: 0, y: 0.5, z: 0 } } );
+
+		const physics = await addPhysics( world );
+
+		// Arena: floor and four low walls, all fixed bodies.
+		const wallMat = new MeshStandardMaterial( { color: 0xf6f6f4, roughness: 0.9 } );
+		const floor = new Mesh( new BoxGeometry( 12, 0.4, 12 ), new MeshStandardMaterial( { color: 0xffffff, roughness: 1 } ) );
+		floor.name = 'Floor';
+		floor.position.y = - 0.2;
+		world.add( floor );
+		physics.add( floor, { type: 'fixed', friction: 0.8 } );
+		for ( const [ x, z, w, d ] of [ [ 0, - 6, 12.4, 0.4 ], [ 0, 6, 12.4, 0.4 ], [ - 6, 0, 0.4, 12 ], [ 6, 0, 0.4, 12 ] ] ) {
+			const wall = new Mesh( new BoxGeometry( w, 0.8, d ), wallMat );
+			wall.name = 'Wall';
+			wall.position.set( x, 0.4, z );
+			world.add( wall );
+			physics.add( wall, { type: 'fixed' } );
+		}
+
+		const KINDS = [
+			{ name: 'Crate', geo: () => new BoxGeometry( 0.8, 0.8, 0.8 ), color: 0x121214, opts: {} },
+			{ name: 'Ball', geo: () => new SphereGeometry( 0.42, 32, 16 ), color: 0xff4f1a, opts: { restitution: 0.75 } },
+			{ name: 'Rock', geo: () => new DodecahedronGeometry( 0.48, 0 ), color: 0x8a8a90, opts: { friction: 0.9 } }
+		];
+
+		const toys = new Set();
+		let hits = 0;
+		const statusEl = document.querySelector( '#status' );
+
+		function dropToys( n ) {
+			for ( let i = 0; i < n; i ++ ) {
+				const kind = KINDS[ ( toys.size + i ) % KINDS.length ];
+				const toy = new Mesh( kind.geo(), new MeshStandardMaterial( { color: kind.color, roughness: 0.55, flatShading: kind.name === 'Rock' } ) );
+				toy.name = kind.name;
+				toy.position.set( ( Math.random() - 0.5 ) * 6, 4 + i * 0.7, ( Math.random() - 0.5 ) * 6 );
+				toy.rotation.set( Math.random() * 3, Math.random() * 3, 0 );
+				world.add( toy );
+				physics.add( toy, kind.opts );
+				physics.onCollision( toy, ( other, started ) => { if ( started ) hits ++; } );
+				world.on( toy, 'click', () => {
+					physics.applyImpulse( toy, [ ( Math.random() - 0.5 ) * 3, 6 * physics.body( toy ).mass(), ( Math.random() - 0.5 ) * 3 ] );
+					statusEl.textContent = `Kicked a ${ toy.name.toLowerCase() }`;
+				} );
+				world.on( toy, 'pointerenter', () => toy.material.emissive.setHex( 0x331008 ) );
+				world.on( toy, 'pointerleave', () => toy.material.emissive.setHex( 0x000000 ) );
+				toys.add( toy );
+			}
+		}
+
+		function clearToys() {
+			for ( const toy of toys ) world.remove( toy );
+			toys.clear();
+			statusEl.textContent = 'Cleared';
+		}
+
+		document.querySelector( '#drop' ).onclick = () => dropToys( 12 );
+		document.querySelector( '#clear' ).onclick = clearToys;
+		dropToys( 12 );
+
+		// Anything that escapes the arena respawns above it.
+		world.onUpdate( () => {
+			for ( const toy of toys ) if ( toy.position.y < - 5 ) physics.teleport( toy, [ 0, 5, 0 ] );
+		} );
+
+		setInterval( () => {
+			document.querySelector( '#bodies' ).textContent = physics.size;
+			document.querySelector( '#hits' ).textContent = hits;
+			document.querySelector( '#geo' ).textContent = world.renderer.info.memory.geometries;
+		}, 250 );
+
+		world.start();
+		const devtools = mountDevtools( world, { open: new URLSearchParams( location.search ).has( 'devtools' ) } );
+		const devBtn = document.querySelector( '#dev' );
+		const sync = () => { devBtn.textContent = devtools.el.hidden ? 'Open devtools · press `' : 'Close devtools · press `'; };
+		devBtn.onclick = () => { devtools.toggle(); sync(); };
+		window.addEventListener( 'keydown', ( e ) => { if ( e.key === '`' ) setTimeout( sync ); } );
+		sync();
+		Object.assign( window, { world, physics, toys, devtools } );
+	</script>
+</body>
+</html>

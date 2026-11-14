@@ -1,0 +1,19 @@
+{
+  "name": "@orreryjs/physics",
+  "version": "0.1.0",
+  "description": "Rapier physics for Orrery worlds: colliders from your meshes, fixed-step simulation, collision events.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./index.d.ts",
+  "exports": { ".": { "types": "./index.d.ts", "default": "./src/index.js" } },
+  "files": ["src", "index.d.ts", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "scripts": { "test": "node --test \"test/*.test.mjs\"" },
+  "dependencies": { "@dimforge/rapier3d-compat": "^0.21.0" },
+  "peerDependencies": { "three": ">=0.184.0", "orreryjs": ">=0.1.0" },
+  "devDependencies": { "three": "^0.184.0" },
+  "repository": { "type": "git", "url": "git+https://github.com/mrigankad/Orrery.git", "directory": "packages/physics" },
+  "homepage": "https://mrigankad.github.io/Orrery/",
+  "keywords": ["three", "threejs", "physics", "rapier", "orrery"],
+  "license": "MIT"
+}
