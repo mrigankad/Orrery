@@ -35,7 +35,8 @@
 			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
 			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
 			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
-			"orreryjs": "../packages/core/src/index.js"
+			"orreryjs": "../packages/core/src/index.js",
+			"@orreryjs/devtools": "../packages/devtools/src/index.js"
 		} }
 	</script>
 </head>
@@ -51,12 +52,14 @@
 			<div><strong id="tex">0</strong><small>textures</small></div>
 		</div>
 		<div class="row"><button id="add" class="primary">Add planet</button><button id="remove">Remove last</button></div>
+		<button id="dev" style="flex:none">Open devtools  ·  press `</button>
 		<p>Remove uses <b>world.remove()</b>, which also frees GPU memory. Watch the geometry count drop.</p>
 	</div>
 
 	<script type="module">
 		import { SRGBColorSpace, CanvasTexture, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, SphereGeometry, DoubleSide } from 'three';
 		import { World, addOrbitControls } from 'orreryjs';
+		import { mountDevtools } from '@orreryjs/devtools';
 
 		const forced = new URLSearchParams( location.search ).get( 'renderer' ); // ?renderer=webgl | webgl2
 		const world = await World.create( { container: document.querySelector( '#app' ), renderer: forced ?? 'auto' } );
@@ -89,7 +92,9 @@
 			if ( i >= NAMES.length ) return;
 			const radius = 2.4 + i * 1.15;
 			const system = new Group();
+			system.name = NAMES[ i ] + ' system';
 			const orbit = new Mesh( new RingGeometry( radius - 0.012, radius + 0.012, 128 ), new MeshBasicMaterial( { color: 0x121214, transparent: true, opacity: 0.25, side: DoubleSide } ) );
+			orbit.name = 'orbit';
 			orbit.rotation.x = - Math.PI / 2;
 			const size = 0.22 + ( i % 3 ) * 0.09;
 			const planet = new Mesh( new SphereGeometry( size, 32, 16 ), new MeshStandardMaterial( { map: stripeTexture( COLORS[ i ] ), roughness: 0.6 } ) );
@@ -137,6 +142,13 @@
 			for ( const s of planets ) s.rotation.y += dt * s.userData.speed;
 		} );
 		world.start();
+		const devtools = mountDevtools( world, { open: new URLSearchParams( location.search ).has( 'devtools' ) } );
+		const devBtn = document.querySelector( '#dev' );
+		const syncDevBtn = () => { devBtn.textContent = devtools.el.hidden ? 'Open devtools  ·  press `' : 'Close devtools  ·  press `'; };
+		devBtn.onclick = () => { devtools.toggle(); syncDevBtn(); };
+		window.addEventListener( 'keydown', ( e ) => { if ( e.key === '`' ) setTimeout( syncDevBtn ); } );
+		syncDevBtn();
+		window.devtools = devtools;
 		window.world = world; // for debugging in the console
 	</script>
 </body>

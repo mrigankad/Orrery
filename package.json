@@ -2,9 +2,11 @@
   "name": "orrery-monorepo",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "test": "npm test -w orreryjs",
+    "test": "npm test --workspaces --if-present",
     "typecheck": "npm run typecheck -w orreryjs",
     "dev": "node scripts/serve.mjs"
   }

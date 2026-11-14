@@ -208,3 +208,9 @@ export interface World {
 export namespace World {
 	function create( config?: WorldConfig & { renderer?: 'auto' | 'webgl2' | 'webgl' } ): Promise<World>;
 }
+
+export interface GpuLostInfo { api: 'webgpu' | 'webgl'; reason: string; message: string; }
+export interface World {
+	readonly gpuLost: GpuLostInfo | null;
+	onGpuLost( fn: ( info: GpuLostInfo ) => void ): () => void;
+}

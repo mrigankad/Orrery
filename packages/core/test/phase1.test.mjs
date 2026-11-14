@@ -130,3 +130,24 @@ test( 'World.create honours an injected renderer and reports its backend', async
 	assert.equal( typeof world.load, 'function' );
 
 } );
+
+test( 'onGpuLost fires once for a lost WebGPU device and late subscribers still hear it', async () => {
+
+	let threeHandled = 0;
+	const renderer = { isWebGPURenderer: true, backend: { isWebGPUBackend: true }, domElement: null, setSize() {}, setPixelRatio() {}, render() {}, dispose() {}, onDeviceLost() { threeHandled ++; } };
+	const world = await World.create( { container: null, createRenderer: () => renderer, warnings: false } );
+
+	const seen = [];
+	world.onGpuLost( ( info ) => seen.push( info ) );
+	renderer.onDeviceLost( { reason: 'unknown', message: 'DXGI_ERROR_DEVICE_HUNG' } );
+	renderer.onDeviceLost( { reason: 'unknown', message: 'again' } );
+
+	assert.equal( threeHandled, 2, "three's own handler still runs" );
+	assert.equal( seen.length, 1 );
+	assert.deepEqual( seen[ 0 ], { api: 'webgpu', reason: 'unknown', message: 'DXGI_ERROR_DEVICE_HUNG' } );
+
+	const late = [];
+	world.onGpuLost( ( info ) => late.push( info ) );
+	assert.equal( late.length, 1 );
+
+} );

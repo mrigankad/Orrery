@@ -106,6 +106,25 @@ class World extends SceneApp {
 
 		}
 
+		// GPU loss: WebGPU device lost, or WebGL context lost. Reported once
+		// through world.onGpuLost() and world.gpuLost.
+		this.gpuLost = null;
+		this._lostCallbacks = new Set();
+		if ( typeof this.renderer.onDeviceLost === 'function' ) {
+
+			const original = this.renderer.onDeviceLost;
+			this.renderer.onDeviceLost = ( info ) => {
+
+				original.call( this.renderer, info );
+				this._reportGpuLost( { api: 'webgpu', reason: info?.reason ?? 'unknown', message: info?.message ?? '' } );
+
+			};
+
+		}
+
+		this._onContextLost = ( event ) => this._reportGpuLost( { api: 'webgl', reason: 'context-lost', message: event?.statusMessage ?? '' } );
+		if ( this.renderer.isWebGLRenderer ) this.renderer.domElement?.addEventListener?.( 'webglcontextlost', this._onContextLost );
+
 		this._raycaster = new Raycaster();
 		this._pointer = new Vector2();
 		this._onPointer = ( event ) => this._handlePointer( event );
@@ -125,6 +144,30 @@ class World extends SceneApp {
 		if ( r.backend?.isWebGPUBackend ) return 'webgpu';
 		if ( r.backend?.isWebGLBackend ) return 'webgl2';
 		return 'unknown';
+
+	}
+
+	/**
+	 * Called once if the GPU device (WebGPU) or context (WebGL) is lost, for
+	 * example after a driver reset. Receives `{ api, reason, message }`.
+	 *
+	 * @param {Function} fn
+	 * @return {Function} Unsubscribe.
+	 */
+	onGpuLost( fn ) {
+
+		this._lostCallbacks.add( fn );
+		if ( this.gpuLost ) fn( this.gpuLost );
+		return () => this._lostCallbacks.delete( fn );
+
+	}
+
+	_reportGpuLost( info ) {
+
+		if ( this.gpuLost ) return;
+		this.gpuLost = info;
+		if ( this.warnings ) console.warn( `Orrery: the GPU ${ info.api === 'webgpu' ? 'device' : 'context' } was lost (${ info.reason }). Reload the page or recreate the World.` );
+		for ( const fn of [ ...this._lostCallbacks ] ) fn( info );
 
 	}
 
@@ -370,6 +413,8 @@ class World extends SceneApp {
 		this.scene.environment?.dispose?.();
 		this._handlers.clear();
 		this._assets?.dispose();
+		this.renderer.domElement?.removeEventListener?.( 'webglcontextlost', this._onContextLost );
+		this._lostCallbacks.clear();
 		super.dispose();
 
 	}
