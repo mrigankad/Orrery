@@ -168,7 +168,7 @@ export interface WorldConfig extends SceneAppConfig {
 	lights?: 'studio' | 'none';
 	/** Default image-based lighting. `'room'` (default) or `'none'`. */
 	environment?: 'room' | 'none';
-	/** ACES filmic tone mapping with sRGB output. Default `true`. */
+	/** Neutral tone mapping with sRGB output. Default `true`. */
 	toneMapping?: boolean;
 	/** Console hints for common traps. Default `true`. */
 	warnings?: boolean;
@@ -186,4 +186,25 @@ export class World extends SceneApp {
 	remove( object: Object3D, options?: { dispose?: boolean } ): number;
 	on( object: Object3D, type: WorldPointerEvent, callback: ( hit: Intersection | null ) => void ): () => void;
 	pick( ndcX: number, ndcY: number ): { object: Object3D; hit: Intersection } | null;
+}
+
+export type AssetKind = 'gltf' | 'hdr' | 'ktx2' | 'texture';
+export interface AssetProgress { url: string; loaded: number; total: number; done: boolean; }
+export interface AssetLoader {
+	load( url: string ): Promise<any>;
+	onProgress( fn: ( progress: AssetProgress ) => void ): () => void;
+	cache: Map<string, Promise<any>>;
+	dispose(): Promise<void>;
+}
+export function assetKind( url: string ): AssetKind;
+export function createAssetLoader( options?: { renderer?: unknown; decoderPath?: string; loaders?: Record<string, unknown> } ): AssetLoader;
+
+export interface World {
+	/** `'webgpu'`, `'webgl2'` (WebGPURenderer fallback) or `'webgl'`. */
+	readonly backend: 'webgpu' | 'webgl2' | 'webgl' | 'unknown';
+	readonly assets: AssetLoader;
+	load( url: string ): Promise<any>;
+}
+export namespace World {
+	function create( config?: WorldConfig & { renderer?: 'auto' | 'webgl2' | 'webgl' } ): Promise<World>;
 }

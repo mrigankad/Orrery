@@ -15,6 +15,7 @@
 		header img { width: 30px; height: 30px; }
 		header b { font-family: Urbanist, sans-serif; font-size: 26px; letter-spacing: -0.03em; }
 		header span { font-size: 13px; color: var(--body); margin-left: 6px; }
+		header em { font-style: normal; font: 600 11px 'Inter Tight', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--sun); background: #FFE9E1; padding: 4px 8px; border-radius: 999px; }
 		#panel { position: fixed; left: 28px; bottom: 28px; width: 300px; background: var(--paper); border: 1px solid var(--rule); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 40px rgba(18,18,20,.08); }
 		.eyebrow { font-size: 11px; letter-spacing: .12em; color: var(--sun); font-weight: 600; text-transform: uppercase; }
 		#focus { font-family: Urbanist, sans-serif; font-size: 30px; line-height: 1; letter-spacing: -0.02em; }
@@ -33,13 +34,14 @@
 		{ "imports": {
 			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
 			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
+			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
 			"orreryjs": "../packages/core/src/index.js"
 		} }
 	</script>
 </head>
 <body>
 	<div id="app"></div>
-	<header><img src="../brand/mark.svg" alt="" /><b>orrery</b><span>demo · three r184</span></header>
+	<header><img src="../brand/mark.svg" alt="" /><b>orrery</b><span>demo · three r184</span><em id="backend">…</em></header>
 	<div id="panel">
 		<div class="eyebrow">Click a planet</div>
 		<div id="focus">Sun</div>
@@ -56,14 +58,16 @@
 		import { SRGBColorSpace, CanvasTexture, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, SphereGeometry, DoubleSide } from 'three';
 		import { World, addOrbitControls } from 'orreryjs';
 
-		const world = new World( { container: document.querySelector( '#app' ) } );
+		const forced = new URLSearchParams( location.search ).get( 'renderer' ); // ?renderer=webgl | webgl2
+		const world = await World.create( { container: document.querySelector( '#app' ), renderer: forced ?? 'auto' } );
+		document.querySelector( '#backend' ).textContent = { webgpu: 'WebGPU', webgl2: 'WebGL 2 fallback', webgl: 'WebGL' }[ world.backend ];
 		world.scene.background = null;
-		world.renderer.setClearColor( 0xffffff, 1 );
+		world.renderer.setClearColor( 0xffffff, 0 ); // transparent: the white page shows through, untouched by tone mapping
 		world.camera.position.set( 0, 7, 13 );
 		world.camera.lookAt( 0, 0, 0 );
 		await addOrbitControls( world, { enableDamping: true } );
 
-		const sun = new Mesh( new SphereGeometry( 1.1, 48, 32 ), new MeshStandardMaterial( { color: 0xff4f1a, emissive: 0xff4f1a, emissiveIntensity: 0.6, roughness: 0.5 } ) );
+		const sun = new Mesh( new SphereGeometry( 1.1, 48, 32 ), new MeshStandardMaterial( { color: 0xff4f1a, emissive: 0xff4f1a, emissiveIntensity: 0.25, roughness: 0.5 } ) );
 		sun.name = 'Sun';
 		world.add( sun );
 

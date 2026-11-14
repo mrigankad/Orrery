@@ -9,6 +9,7 @@
  */
 
 export { World } from './World.js';
+export { createAssetLoader, assetKind } from './assets.js';
 export { SceneApp } from './SceneApp.js';
 export { Loop } from './Loop.js';
 export { ResizeManager } from './ResizeManager.js';

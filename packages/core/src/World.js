@@ -1,5 +1,5 @@
 import {
-	ACESFilmicToneMapping,
+	NeutralToneMapping,
 	PMREMGenerator,
 	Raycaster,
 	SRGBColorSpace,
@@ -9,6 +9,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { SceneApp } from './SceneApp.js';
 import { addStudioLighting } from './lighting.js';
 import { disposeObject } from './dispose.js';
+import { createAssetLoader } from './assets.js';
 
 const POINTER_TYPES = [ 'click', 'pointerenter', 'pointerleave', 'pointerdown', 'pointerup' ];
 
@@ -18,7 +19,7 @@ const POINTER_TYPES = [ 'click', 'pointerenter', 'pointerleave', 'pointerdown', 
  *
  * - Lit by default (studio lights and a RoomEnvironment IBL), so PBR materials
  *   are never black on first render.
- * - Filmic tone mapping and sRGB output configured for you.
+ * - Neutral tone mapping (whites stay white) and sRGB output.
  * - `world.remove(obj)` detaches and frees GPU memory in one call.
  * - Object pointer events: `world.on(mesh, 'click', fn)`, plus
  *   `pointerenter`, `pointerleave`, `pointerdown`, `pointerup`.
@@ -38,9 +39,32 @@ class World extends SceneApp {
 	 * @param {Object} [config] - All SceneApp options, plus:
 	 * @param {('studio'|'none')} [config.lights='studio'] - Default light rig.
 	 * @param {('room'|'none')} [config.environment='room'] - Default IBL.
-	 * @param {boolean} [config.toneMapping=true] - ACES filmic + sRGB output.
+	 * @param {boolean} [config.toneMapping=true] - Khronos PBR Neutral tone mapping + sRGB output.
 	 * @param {boolean} [config.warnings=true] - Console hints for common traps.
 	 */
+	/**
+	 * Creates a World on the best renderer the browser has. With
+	 * `renderer: 'auto'` (default) that is three's WebGPURenderer, which
+	 * itself falls back to a WebGL 2 backend when WebGPU is missing.
+	 *
+	 * @param {Object} [config] - Same as the constructor, plus
+	 * `renderer: 'auto' | 'webgl2' | 'webgl'`.
+	 * @return {Promise<World>}
+	 */
+	static async create( config = {} ) {
+
+		const { renderer = 'auto', antialias = true } = config;
+
+		if ( renderer === 'webgl' || config.createRenderer ) return new World( config );
+
+		const webgpu = await import( 'three/webgpu' );
+		const instance = new webgpu.WebGPURenderer( { antialias, forceWebGL: renderer === 'webgl2' } );
+		await instance.init();
+
+		return new World( { ...config, createRenderer: () => instance, PMREMGenerator: webgpu.PMREMGenerator } );
+
+	}
+
 	constructor( config = {} ) {
 
 		super( config );
@@ -59,12 +83,13 @@ class World extends SceneApp {
 
 		if ( toneMapping && 'toneMapping' in this.renderer ) {
 
-			this.renderer.toneMapping = ACESFilmicToneMapping;
+			this.renderer.toneMapping = NeutralToneMapping;
 			this.renderer.outputColorSpace = SRGBColorSpace;
 
 		}
 
-		const useRoom = environment === 'room' && this.renderer.isWebGLRenderer;
+		const PMREM = config.PMREMGenerator ?? ( this.renderer.isWebGLRenderer ? PMREMGenerator : null );
+		const useRoom = environment === 'room' && PMREM !== null;
 
 		// When the room IBL is on it already lights the scene, so the studio rig
 		// is dimmed to add shape without blowing out the exposure.
@@ -72,7 +97,7 @@ class World extends SceneApp {
 
 		if ( useRoom ) {
 
-			const pmrem = new PMREMGenerator( this.renderer );
+			const pmrem = new PMREM( this.renderer );
 			const room = new RoomEnvironment();
 			this.scene.environment = pmrem.fromScene( room, 0.04 ).texture;
 			this.scene.environmentIntensity = 0.6;
@@ -84,6 +109,46 @@ class World extends SceneApp {
 		this._raycaster = new Raycaster();
 		this._pointer = new Vector2();
 		this._onPointer = ( event ) => this._handlePointer( event );
+
+	}
+
+	/**
+	 * Which GPU path is drawing: `'webgpu'`, `'webgl2'` (WebGPURenderer's
+	 * fallback) or `'webgl'` (classic WebGLRenderer). `'unknown'` for mocks.
+	 *
+	 * @type {string}
+	 */
+	get backend() {
+
+		const r = this.renderer;
+		if ( r.isWebGLRenderer ) return 'webgl';
+		if ( r.backend?.isWebGPUBackend ) return 'webgpu';
+		if ( r.backend?.isWebGLBackend ) return 'webgl2';
+		return 'unknown';
+
+	}
+
+	/**
+	 * The world's asset loader (created on first use). See `createAssetLoader`.
+	 *
+	 * @type {Object}
+	 */
+	get assets() {
+
+		return this._assets ??= createAssetLoader( { renderer: this.renderer } );
+
+	}
+
+	/**
+	 * Loads any supported asset by extension: glTF/GLB (Draco, KTX2 and
+	 * Meshopt ready), HDR, KTX2, or an image texture (sRGB). Cached by URL.
+	 *
+	 * @param {string} url
+	 * @return {Promise<any>}
+	 */
+	load( url ) {
+
+		return this.assets.load( url );
 
 	}
 
@@ -304,6 +369,7 @@ class World extends SceneApp {
 		disposeObject( this.scene );
 		this.scene.environment?.dispose?.();
 		this._handlers.clear();
+		this._assets?.dispose();
 		super.dispose();
 
 	}

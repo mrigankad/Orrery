@@ -73,3 +73,12 @@ const off: () => void = world.on( world.scene, 'click', ( hit ) => { void hit; }
 off();
 const freed: number = world.remove( world.scene.children[ 0 ] );
 void freed;
+
+async function phase1() {
+	const w = await World.create( { renderer: 'auto' } );
+	const b: string = w.backend;
+	const gltf = await w.load( 'a.glb' );
+	w.assets.onProgress( ( p ) => p.loaded / p.total );
+	void b; void gltf;
+}
+void phase1;
