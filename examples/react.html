@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Orrery · React</title>
+	<link rel="icon" href="../brand/favicon.svg" type="image/svg+xml" />
+	<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet" />
+	<style>
+		:root { --sun: #FF4F1A; --ink: #121214; --body: #5C5C63; --sheet: #F6F6F4; --rule: #E8E7E3; }
+		html, body { margin: 0; height: 100%; background: #fff; color: var(--ink); font-family: 'Inter Tight', system-ui, sans-serif; overflow: hidden; }
+		#root, .stage { position: fixed; inset: 0; }
+		header { position: fixed; top: 24px; left: 28px; display: flex; align-items: center; gap: 10px; z-index: 2; }
+		header img { width: 30px; height: 30px; }
+		header b { font-family: Urbanist, sans-serif; font-size: 26px; letter-spacing: -0.03em; }
+		header nav { display: flex; gap: 4px; margin-left: 12px; }
+		header nav a { font-size: 13px; color: var(--body); text-decoration: none; padding: 6px 10px; border-radius: 999px; }
+		header nav a[aria-current] { background: var(--sheet); color: var(--ink); font-weight: 500; }
+		.panel { position: fixed; left: 28px; bottom: 28px; width: 300px; background: #fff; border: 1px solid var(--rule); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 40px rgba(18,18,20,.08); z-index: 2; }
+		.eyebrow { font-size: 11px; letter-spacing: .12em; color: var(--sun); font-weight: 600; text-transform: uppercase; }
+		h1 { margin: 0; font-family: Urbanist, sans-serif; font-size: 28px; letter-spacing: -0.02em; }
+		button { font: 500 13px 'Inter Tight', sans-serif; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--sheet); cursor: pointer; }
+		button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+		.row { display: flex; gap: 8px; } .row button { flex: 1; }
+		p { margin: 0; font-size: 13px; color: var(--body); line-height: 19px; }
+	</style>
+	<script type="importmap">
+		{ "imports": {
+			"react": "https://esm.sh/react@18.3.1",
+			"react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
+			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			"orreryjs": "../packages/core/src/index.js",
+			"@orreryjs/react": "../packages/react/src/index.js"
+		} }
+	</script>
+</head>
+<body>
+	<header><img src="../brand/mark.svg" alt="" /><b>orrery</b>
+		<nav><a href="index.html">Orrery</a><a href="physics.html">Physics</a><a href="react.html" aria-current="page">React</a></nav></header>
+	<div id="root"></div>
+	<script type="module">
+		import { createElement as h, useMemo, useState } from 'react';
+		import { createRoot } from 'react-dom/client';
+		import { Mesh, MeshStandardMaterial, TorusKnotGeometry } from 'three';
+		import { OrreryCanvas, useFrame, useObject, useEvent } from '@orreryjs/react';
+
+		// Plain three.js inside hooks: the World lights it, frees it on unmount, and routes clicks.
+		function Knot( { x, color, onPick } ) {
+			const knot = useMemo( () => {
+				const m = new Mesh( new TorusKnotGeometry( 0.6, 0.2, 128, 24 ), new MeshStandardMaterial( { color, roughness: 0.4 } ) );
+				m.position.x = x;
+				m.name = `Knot ${ x }`;
+				return m;
+			}, [] );
+			useObject( knot );
+			useFrame( ( dt ) => { knot.rotation.y += dt * 0.8; knot.rotation.x += dt * 0.3; } );
+			useEvent( knot, 'click', () => onPick( knot.name ) );
+			useEvent( knot, 'pointerenter', () => knot.scale.setScalar( 1.15 ) );
+			useEvent( knot, 'pointerleave', () => knot.scale.setScalar( 1 ) );
+			return null;
+		}
+
+		function App() {
+			const [ count, setCount ] = useState( 3 );
+			const [ picked, setPicked ] = useState( 'nothing yet' );
+			const [ world, setWorld ] = useState( null );
+			const knots = Array.from( { length: count }, ( _, i ) => h( Knot, { key: i, x: ( i - ( count - 1 ) / 2 ) * 1.9, color: [ 0xff4f1a, 0x121214, 0x8a8a90 ][ i % 3 ], onPick: setPicked } ) );
+			return h( 'div', null,
+				h( OrreryCanvas, { className: 'stage', options: { adaptive: true }, onCreated: ( w ) => { w.renderer.setClearColor( 0xffffff, 0 ); w.camera.position.set( 0, 1, 7 ); w.camera.lookAt( 0, 0, 0 ); window.world = w; setWorld( w ); } }, knots ),
+				h( 'div', { className: 'panel' },
+					h( 'div', { className: 'eyebrow' }, '@orreryjs/react' ),
+					h( 'h1', null, `${ count } knots` ),
+					h( 'p', { id: 'picked' }, `Clicked: ${ picked }` ),
+					h( 'div', { className: 'row' },
+						h( 'button', { className: 'primary', id: 'more', onClick: () => setCount( ( c ) => Math.min( 5, c + 1 ) ) }, 'Add knot' ),
+						h( 'button', { id: 'less', onClick: () => setCount( ( c ) => Math.max( 0, c - 1 ) ) }, 'Remove knot' ) ),
+					h( 'p', null, 'Each knot is a component. Removing one unmounts it, and useObject frees its GPU memory.' ) ) );
+		}
+
+		createRoot( document.getElementById( 'root' ) ).render( h( App ) );
+	</script>
+</body>
+</html>
