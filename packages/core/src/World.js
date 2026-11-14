@@ -10,6 +10,8 @@ import { SceneApp } from './SceneApp.js';
 import { addStudioLighting } from './lighting.js';
 import { disposeObject } from './dispose.js';
 import { createAssetLoader } from './assets.js';
+import { createAdaptiveResolution } from './adaptive.js';
+import { instanceMeshes } from './optimize.js';
 
 const POINTER_TYPES = [ 'click', 'pointerenter', 'pointerleave', 'pointerdown', 'pointerup' ];
 
@@ -73,10 +75,17 @@ class World extends SceneApp {
 			lights = 'studio',
 			environment = 'room',
 			toneMapping = true,
-			warnings = true
+			warnings = true,
+			adaptive = false
 		} = config;
 
 		this.warnings = warnings;
+
+		/**
+		 * Adaptive resolution controller, or null when off. Enable with
+		 * `adaptive: true` or `adaptive: { min, max, budgetMs }`.
+		 */
+		this.adaptive = adaptive ? createAdaptiveResolution( adaptive === true ? {} : adaptive ) : null;
 		this._warned = new Set();
 		this._handlers = new Map(); // Object3D -> { type: Set<fn> }
 		this._hovered = null;
@@ -376,7 +385,46 @@ class World extends SceneApp {
 
 	}
 
+	/**
+	 * The current resolution scale (1 = full device pixel ratio).
+	 *
+	 * @type {number}
+	 */
+	get resolutionScale() {
+
+		return this._resize.scale;
+
+	}
+
+	/**
+	 * Folds meshes that share geometry and material into InstancedMeshes.
+	 * Meshes with pointer events are left alone so events keep working.
+	 *
+	 * @param {Object} [root=this.scene]
+	 * @param {Object} [options] - See `instanceMeshes`.
+	 * @return {{groups: number, meshes: number, drawCallsSaved: number}}
+	 */
+	optimize( root = this.scene, options = {} ) {
+
+		const userSkip = options.skip ?? ( () => false );
+		const hasEvents = ( m ) => { for ( let n = m; n; n = n.parent ) if ( this._handlers.has( n ) ) return true; return false; };
+		return instanceMeshes( root, { ...options, skip: ( m ) => hasEvents( m ) || userSkip( m ) } );
+
+	}
+
 	_tick( delta, elapsed ) {
+
+		if ( this.adaptive && ! ( typeof document !== 'undefined' && document.hidden ) ) {
+
+			const next = this.adaptive.feed( delta * 1000 );
+			if ( next !== null ) {
+
+				this._resize.scale = next;
+				this._resize.update();
+
+			}
+
+		}
 
 		super._tick( delta, elapsed );
 		if ( this.warnings && ! this._warned.has( 'unlit' ) ) this._checkUnlit();

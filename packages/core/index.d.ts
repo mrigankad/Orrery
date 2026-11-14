@@ -214,3 +214,15 @@ export interface World {
 	readonly gpuLost: GpuLostInfo | null;
 	onGpuLost( fn: ( info: GpuLostInfo ) => void ): () => void;
 }
+
+export interface AdaptiveOptions { budgetMs?: number; min?: number; max?: number; step?: number; window?: number; ignoreAboveMs?: number; }
+export interface AdaptiveResolution { feed( ms: number ): number | null; readonly scale: number; reset(): void; }
+export function createAdaptiveResolution( options?: AdaptiveOptions ): AdaptiveResolution;
+export interface InstanceReport { groups: number; meshes: number; drawCallsSaved: number; instanced: import( 'three' ).InstancedMesh[]; }
+export function instanceMeshes( root: Object3D, options?: { minCount?: number; skip?: ( mesh: Object3D ) => boolean } ): InstanceReport;
+export interface WorldConfig { adaptive?: boolean | AdaptiveOptions; }
+export interface World {
+	readonly adaptive: AdaptiveResolution | null;
+	readonly resolutionScale: number;
+	optimize( root?: Object3D, options?: { minCount?: number; skip?: ( mesh: Object3D ) => boolean } ): InstanceReport;
+}

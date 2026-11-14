@@ -52,21 +52,22 @@
 			<div><strong id="tex">0</strong><small>textures</small></div>
 		</div>
 		<div class="row"><button id="add" class="primary">Add planet</button><button id="remove">Remove last</button></div>
+		<div class="row"><button id="belt">Instance the belt</button></div>
 		<button id="dev" style="flex:none">Open devtools  ·  press `</button>
 		<p>Remove uses <b>world.remove()</b>, which also frees GPU memory. Watch the geometry count drop.</p>
 	</div>
 
 	<script type="module">
-		import { SRGBColorSpace, CanvasTexture, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, SphereGeometry, DoubleSide } from 'three';
+		import { DodecahedronGeometry, SRGBColorSpace, CanvasTexture, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, SphereGeometry, DoubleSide } from 'three';
 		import { World, addOrbitControls } from 'orreryjs';
 		import { mountDevtools } from '@orreryjs/devtools';
 
 		const forced = new URLSearchParams( location.search ).get( 'renderer' ); // ?renderer=webgl | webgl2
-		const world = await World.create( { container: document.querySelector( '#app' ), renderer: forced ?? 'auto' } );
+		const world = await World.create( { container: document.querySelector( '#app' ), renderer: forced ?? 'auto', adaptive: true } );
 		document.querySelector( '#backend' ).textContent = { webgpu: 'WebGPU', webgl2: 'WebGL 2 fallback', webgl: 'WebGL' }[ world.backend ];
 		world.scene.background = null;
 		world.renderer.setClearColor( 0xffffff, 0 ); // transparent: the white page shows through, untouched by tone mapping
-		world.camera.position.set( 0, 7, 13 );
+		world.camera.position.set( 0, 8, 15 );
 		world.camera.lookAt( 0, 0, 0 );
 		await addOrbitControls( world, { enableDamping: true } );
 
@@ -132,6 +133,30 @@
 			} ) );
 		}
 
+		// Asteroid belt: 300 rocks sharing one geometry and material, so they
+		// are perfect for world.optimize() (300 draw calls -> 1).
+		const belt = new Group();
+		belt.name = 'Asteroid belt';
+		const rockGeo = new DodecahedronGeometry( 0.045, 0 );
+		const rockMat = new MeshStandardMaterial( { color: 0x8a8a90, roughness: 0.9, flatShading: true } );
+		for ( let i = 0; i < 300; i ++ ) {
+			const a = Math.random() * Math.PI * 2, r = 4.12 + ( Math.random() - 0.5 ) * 0.55;
+			const rock = new Mesh( rockGeo, rockMat );
+			rock.name = 'rock';
+			rock.position.set( Math.cos( a ) * r, ( Math.random() - 0.5 ) * 0.25, Math.sin( a ) * r );
+			rock.rotation.set( Math.random() * 3, Math.random() * 3, 0 );
+			rock.scale.setScalar( 0.6 + Math.random() * 0.9 );
+			belt.add( rock );
+		}
+		world.add( belt );
+		const beltBtn = document.querySelector( '#belt' );
+		beltBtn.onclick = () => {
+			const report = world.optimize( belt );
+			beltBtn.textContent = `Instanced: ${ report.drawCallsSaved } draw calls saved`;
+			beltBtn.disabled = true;
+			refresh();
+		};
+
 		world.on( sun, 'click', () => { focusEl.textContent = 'Sun'; } );
 		document.querySelector( '#add' ).onclick = addPlanet;
 		document.querySelector( '#remove' ).onclick = removePlanet;
@@ -140,6 +165,7 @@
 		world.onUpdate( ( dt ) => {
 			sun.rotation.y += dt * 0.2;
 			for ( const s of planets ) s.rotation.y += dt * s.userData.speed;
+			belt.rotation.y += dt * 0.03;
 		} );
 		world.start();
 		const devtools = mountDevtools( world, { open: new URLSearchParams( location.search ).has( 'devtools' ) } );

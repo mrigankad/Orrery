@@ -190,7 +190,8 @@ function mountDevtools( world, options = {} ) {
 		const r = renderStats( world.renderer );
 
 		$( 'fps' ).textContent = f.fps;
-		$( 'ms' ).textContent = `fps · ${ f.avgMs.toFixed( 1 ) } ms`;
+		const scale = world.resolutionScale ?? 1;
+		$( 'ms' ).textContent = `fps · ${ f.avgMs.toFixed( 1 ) } ms${ world.adaptive ? ` · res ${ Math.round( scale * 100 ) }%` : '' }`;
 		$( 'calls' ).textContent = r.drawCalls;
 		$( 'tris' ).textContent = compact( r.triangles );
 		$( 'slow' ).textContent = f.slow;
@@ -250,7 +251,8 @@ function mountDevtools( world, options = {} ) {
 			const node = document.createElement( 'div' );
 			node.className = 'node' + ( row.object === selected ? ' sel' : '' ) + ( row.object.visible ? '' : ' hid' );
 			node.style.paddingLeft = `${ 6 + row.depth * 16 }px`;
-			const meta = row.events ? `${ row.type } · ${ row.events } event${ row.events > 1 ? 's' : '' }` : ( row.childCount && ! row.open ? `${ row.type } · ${ row.childCount }` : row.type );
+			const inst = row.object.isInstancedMesh ? `Instanced ×${ row.object.count }` : null;
+			const meta = inst ?? ( row.events ? `${ row.type } · ${ row.events } event${ row.events > 1 ? 's' : '' }` : ( row.childCount && ! row.open ? `${ row.type } · ${ row.childCount }` : row.type ) );
 			node.innerHTML = `<span class="tw">${ row.childCount ? ( row.open ? '▾' : '▸' ) : '' }</span><span class="lbl"></span><span class="meta"></span>`;
 			node.querySelector( '.lbl' ).textContent = row.label;
 			node.querySelector( '.meta' ).textContent = meta;

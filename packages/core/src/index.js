@@ -10,6 +10,8 @@
 
 export { World } from './World.js';
 export { createAssetLoader, assetKind } from './assets.js';
+export { createAdaptiveResolution } from './adaptive.js';
+export { instanceMeshes } from './optimize.js';
 export { SceneApp } from './SceneApp.js';
 export { Loop } from './Loop.js';
 export { ResizeManager } from './ResizeManager.js';

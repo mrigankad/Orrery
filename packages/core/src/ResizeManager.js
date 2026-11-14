@@ -27,6 +27,13 @@ class ResizeManager {
 		this.renderer = renderer;
 		this.maxPixelRatio = maxPixelRatio;
 
+		/**
+		 * Multiplier on the device pixel ratio, used by adaptive resolution.
+		 *
+		 * @type {number}
+		 */
+		this.scale = 1;
+
 		this._measure = measure || ( () => ( {
 			width: container.clientWidth,
 			height: container.clientHeight
@@ -54,7 +61,7 @@ class ResizeManager {
 		const pixelRatio = Math.min(
 			typeof devicePixelRatio !== 'undefined' ? devicePixelRatio : 1,
 			this.maxPixelRatio
-		);
+		) * this.scale;
 
 		this.camera.aspect = width / height;
 		this.camera.updateProjectionMatrix();

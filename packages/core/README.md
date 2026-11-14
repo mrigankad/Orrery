@@ -47,10 +47,22 @@ If you use three's WebGPU build through an import map, also map `three/webgpu`. 
 | `world.on(obj, type, fn)` | `click`, `pointerenter`, `pointerleave`, `pointerdown`, `pointerup`; returns an unsubscribe |
 | `world.load(url)` | glTF/GLB, KTX2, HDR, PNG/JPG/WebP. Cached by URL |
 | `world.assets.onProgress(fn)` | `{ url, loaded, total, done }` across every load |
+| `world.optimize(root?)` | Folds meshes sharing geometry and material into InstancedMeshes (300 rocks: 300 draw calls to 1). Meshes with events are kept |
+| `adaptive: true` | Lowers resolution when frames run over budget, raises it back with headroom. `world.resolutionScale` |
+| `world.onGpuLost(fn)` | WebGPU device loss or WebGL context loss, reported once as `{ api, reason, message }` |
 | `world.onUpdate(fn)` / `start()` / `stop()` / `dispose()` | Frame loop and lifecycle |
 | Config | `lights: 'studio' \| 'none'`, `environment: 'room' \| 'none'`, `toneMapping`, `warnings`, `fov`, `near`, `far` |
 
 Also exported: `createAssetLoader`, `addOrbitControls`, `loadGLTF`, `loadTexture`, `setEnvironment`, `memoizeLoader`, `screenshot`, `addStats`, `addPicking`, `loadAudio`, `disposeObject`, `Loop`, `ResizeManager`, `SceneApp`. Types ship in `index.d.ts`.
+
+## Devtools
+
+```js
+import { mountDevtools } from '@orreryjs/devtools';
+mountDevtools( world );   // ` toggles, Alt+click selects in the scene
+```
+
+A frame graph with a budget line, draw call and triangle budgets, GPU memory with a leak check (geometries that left the scene without `dispose()`), a live scene tree and an inspector. Try it on the [demo](https://mrigankad.github.io/Orrery/examples/?devtools).
 
 ## Roadmap
 
@@ -61,7 +73,7 @@ Also exported: `createAssetLoader`, `addOrbitControls`, `loadGLTF`, `loadTexture
 ```sh
 npm install
 npm run dev        # demo on http://127.0.0.1:5173  (?renderer=webgl2 or ?renderer=webgl)
-npm test           # node --test, 25 tests
+npm test           # node --test, 35 tests across both packages
 npm run typecheck
 ```
 
