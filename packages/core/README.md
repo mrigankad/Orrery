@@ -4,12 +4,15 @@
   <a href="https://mrigankad.github.io/Orrery/"><b>Live demo</b></a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#api">API</a> ·
+  <a href="https://mrigankad.github.io/Orrery/docs/"><b>Docs</b></a> ·
   <a href="#roadmap">Roadmap</a>
 </p>
 
 <p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/02-before-after.png" alt="Before and after. Plain three.js needs 29 lines for a lit, resizable, clickable cube and still leaks GPU memory on scene.remove. Orrery does it in 9 lines with World.create, world.on and world.remove: lit by default, WebGPU with a WebGL 2 fallback, resize and tone mapping handled, and remove frees geometry, materials and textures."></p>
 
 <p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/03-load-gpu.png" alt="One load for every file and the best GPU path picked for you. world.load picks the loader from the extension: glb and gltf with Draco, KTX2 and Meshopt wired in, ktx2 Basis textures, hdr environments, and png, jpg or webp textures in sRGB, with aggregate progress. World.create uses WebGPU when the browser supports it, falls back to WebGL 2 automatically, and new World gives the classic WebGL renderer."></p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/03b-batteries.png" alt="The batteries, each a small package: @orreryjs/devtools with a frame graph, GPU memory leak check, scene tree and inspector; @orreryjs/physics with Rapier colliders from your meshes; @orreryjs/ui for labels and keyboard access; @orreryjs/ecs for traits and systems; @orreryjs/react for plain three.js in hooks; plus npm create orreryjs, npx orreryjs doctor and automatic recovery when the GPU driver resets."></p>
 
 ## Quick start
 
@@ -121,14 +124,14 @@ Checks that three is installed and new enough, that there is only one copy of th
 
 ## Roadmap
 
-<p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: orreryjs core. Next: @orreryjs/devtools with a scene inspector, perf HUD, GPU memory view and upgrade codemods. Then: physics, UI and ECS packages. And: React, Svelte and Vue bindings with a docs site and a starter."></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: seven packages (core, devtools, physics, UI and keyboard, ECS, React, the starter) and npx orreryjs doctor, with 62 tests. Next: Svelte and Vue bindings. Then: publish 0.1 to npm. After: a gallery and guides. Quick start: npm create orreryjs@latest my-world."></p>
 
 ## Develop
 
 ```sh
 npm install
 npm run dev        # demo on http://127.0.0.1:5173  (?renderer=webgl2 or ?renderer=webgl)
-npm test           # node --test, 56 tests across five packages (physics runs real Rapier)
+npm test           # node --test, 62 tests across seven packages (physics runs real Rapier)
 npm run typecheck
 ```
 
