@@ -51,7 +51,8 @@ function createUI( world, options = {} ) {
 
 	}
 
-	if ( getComputedStyle( container ).position === 'static' ) container.style.position = 'relative';
+	const position = getComputedStyle( container ).position;
+	if ( ! position || position === 'static' ) container.style.position = 'relative';
 
 	const layer = document.createElement( 'div' );
 	layer.className = 'orr-ui';

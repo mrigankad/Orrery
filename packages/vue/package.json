@@ -1,0 +1,48 @@
+{
+  "name": "@orreryjs/vue",
+  "version": "0.1.0",
+  "description": "Vue bindings for Orrery: OrreryCanvas, useWorld, useFrame, useObject, useEvent, useLoad.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "peerDependencies": {
+    "vue": ">=3.3",
+    "three": ">=0.184.0",
+    "@orreryjs/core": ">=0.1.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.0",
+    "three": "^0.184.0",
+    "jsdom": "^25.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrigankad/Orrery.git",
+    "directory": "packages/vue"
+  },
+  "homepage": "https://mrigankad.github.io/Orrery/docs/",
+  "keywords": [
+    "three",
+    "threejs",
+    "vue",
+    "webgpu",
+    "orrery"
+  ],
+  "license": "MIT"
+}

@@ -114,6 +114,8 @@
 			<a href="#ui">UI and keyboard</a>
 			<a href="#ecs">ECS</a>
 			<a href="#react">React</a>
+			<a href="#vue">Vue</a>
+			<a href="#svelte">Svelte</a>
 			<h4>Guides</h4>
 			<a href="#performance">Performance</a>
 			<a href="#upgrading">Upgrading three</a>
@@ -131,7 +133,8 @@
 
 <span class="c"># optional packages</span>
 npm i @orreryjs/devtools @orreryjs/physics
-npm i @orreryjs/ui @orreryjs/ecs @orreryjs/react</code></pre>
+npm i @orreryjs/ui @orreryjs/ecs
+npm i @orreryjs/react   <span class="c"># or @orreryjs/vue, @orreryjs/svelte</span></code></pre>
 					<a class="example" href="../examples/"><img src="readme/orrery-render.png" alt="The Orrery demo: an orange sun with planets on orbit rings" /><div><span>Live demo</span><span>Open ↗</span></div></a>
 				</div>
 				<p class="note">Orrery is an independent project and is not affiliated with three.js. All credit for three.js goes to mrdoob and its contributors.</p>
@@ -257,6 +260,33 @@ ecs.system( ( dt ) =&gt; { <span class="k">for</span> ( <span class="k">const</s
 
 &lt;OrreryCanvas style={ { height: 400 } }&gt;&lt;Spinner /&gt;&lt;/OrreryCanvas&gt;</code></pre>
 				<p>A thin binding: you write plain three.js inside hooks, and the World handles the rest.</p>
+			</section>
+
+			<section id="vue">
+				<p class="eyebrow">Packages · @orreryjs/vue</p>
+				<h2>Vue</h2>
+				<pre><code><span class="k">import</span> { OrreryCanvas, useObject, useFrame, useEvent } <span class="k">from</span> <span class="s">'@orreryjs/vue'</span>;
+
+<span class="c">// inside &lt;script setup&gt; of a child of &lt;OrreryCanvas&gt;</span>
+<span class="k">const</span> knot = shallowRef( <span class="k">new</span> Mesh( geometry, material ) );
+useObject( knot );                             <span class="c">// added on mount, removed and freed on unmount</span>
+useFrame( ( dt ) =&gt; { knot.value.rotation.y += dt; } );
+useEvent( knot, <span class="s">'click'</span>, () =&gt; {} );</code></pre>
+				<p>Composables accept plain objects or refs; swapping a ref's value swaps the object in the scene. Keep three.js objects in <code>shallowRef</code>: a deep <code>ref</code> wraps them in reactive proxies. The bindings unwrap proxies, so events work either way.</p>
+			</section>
+
+			<section id="svelte">
+				<p class="eyebrow">Packages · @orreryjs/svelte</p>
+				<h2>Svelte</h2>
+				<pre><code>&lt;script&gt;
+  <span class="k">import</span> { orrery, track, frame, listen } <span class="k">from</span> <span class="s">'@orreryjs/svelte'</span>;
+  <span class="k">let</span> world = $state( <span class="k">null</span> );
+  $effect( () =&gt; world &amp;&amp; track( world, cube ) );
+  $effect( () =&gt; world &amp;&amp; frame( world, ( dt ) =&gt; { cube.rotation.y += dt; } ) );
+&lt;/script&gt;
+
+&lt;div use:orrery={ { onCreated: ( w ) =&gt; ( world = w ) } }&gt;&lt;/div&gt;</code></pre>
+				<p>No compiler plugin. The action creates and disposes the World with its element; each helper returns the cleanup <code>$effect</code> expects.</p>
 			</section>
 
 			<section id="performance">

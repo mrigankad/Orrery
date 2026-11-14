@@ -4,7 +4,9 @@ All packages share one version. Orrery follows semver from 1.0; before that, min
 
 ## Unreleased
 
-- `@orreryjs/svelte` and `@orreryjs/vue` bindings.
+- `@orreryjs/vue`: `OrreryCanvas`, `useWorld`, `useFrame`, `useObject`, `useEvent`, `useLoad`; accepts refs and unwraps reactive proxies so events reach the raw three.js object.
+- `@orreryjs/svelte`: `use:orrery` action plus `track`, `frame`, `listen`, `load` helpers that return cleanups for `$effect`.
+- Fixed: `@orreryjs/ui` (and the Svelte action) now make their container `position: relative` when the computed position is empty, not only when it is `static`.
 - CI also runs the tests, type check and doctor against the newest three.js release (weekly and on every push), so upstream breaking changes show up before users hit them. `node scripts/use-three.mjs <version>` does the same locally.
 - Checked: 0.1.0 works unchanged with three r187 (all tests, types and doctor pass; the demo renders on WebGPU in Chrome).
 

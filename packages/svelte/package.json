@@ -1,0 +1,46 @@
+{
+  "name": "@orreryjs/svelte",
+  "version": "0.1.0",
+  "description": "Svelte bindings for Orrery: a use:orrery action plus track, frame, listen and load helpers for $effect.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "peerDependencies": {
+    "three": ">=0.184.0",
+    "@orreryjs/core": ">=0.1.0"
+  },
+  "devDependencies": {
+    "three": "^0.184.0",
+    "jsdom": "^25.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrigankad/Orrery.git",
+    "directory": "packages/svelte"
+  },
+  "homepage": "https://mrigankad.github.io/Orrery/docs/",
+  "keywords": [
+    "three",
+    "threejs",
+    "svelte",
+    "webgpu",
+    "orrery"
+  ],
+  "license": "MIT"
+}

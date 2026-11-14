@@ -74,6 +74,10 @@ mountDevtools( world );   // ` toggles, Alt+click selects in the scene
 
 A frame graph with a budget line, draw call and triangle budgets, GPU memory with a leak check (geometries that left the scene without `dispose()`), a live scene tree and an inspector. Try it on the [demo](https://mrigankad.github.io/Orrery/examples/?devtools).
 
+## Vue and Svelte
+
+`@orreryjs/vue` has the same API as React (`OrreryCanvas`, `useWorld`, `useFrame`, `useObject`, `useEvent`, `useLoad`, with ref support). `@orreryjs/svelte` is a `use:orrery` action plus `track`, `frame`, `listen` and `load` helpers that return cleanups for `$effect`. See the [docs](https://mrigankad.github.io/Orrery/docs/#vue).
+
 ## Physics
 
 ```js
@@ -137,7 +141,7 @@ Checks that three is installed and new enough, that there is only one copy of th
 ```sh
 npm install
 npm run dev        # demo on http://127.0.0.1:5173  (?renderer=webgl2 or ?renderer=webgl)
-npm test           # node --test, 62 tests across seven packages (physics runs real Rapier)
+npm test           # node --test, 67 tests across nine packages (physics runs real Rapier)
 npm run typecheck
 ```
 
