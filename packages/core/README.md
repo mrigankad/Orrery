@@ -1,6 +1,12 @@
 <p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/01-hero.png" alt="Orrery, batteries for three.js. Headline: Wind up a world. Watch it run. A small layer on three.js that lights your scene, frees GPU memory, gives objects click events and runs on WebGPU with WebGL as a fallback. Install with npm i @orreryjs/core three. Beside it, a live render of the Orrery demo: an orange sun with planets on orbit rings."></p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@orreryjs/core"><img src="https://img.shields.io/npm/v/@orreryjs/core?color=FF4F1A&label=%40orreryjs%2Fcore" alt="npm version" /></a>
+  <a href="https://github.com/mrigankad/Orrery/actions/workflows/ci.yml"><img src="https://github.com/mrigankad/Orrery/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <img src="https://img.shields.io/badge/license-MIT-121214" alt="MIT" />
+</p>
+
+<p align="center">
   <a href="https://mrigankad.github.io/Orrery/"><b>Live demo</b></a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#api">API</a> ·
@@ -124,7 +130,7 @@ Checks that three is installed and new enough, that there is only one copy of th
 
 ## Roadmap
 
-<p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: seven packages (core, devtools, physics, UI and keyboard, ECS, React, the starter) and npx orreryjs doctor, with 62 tests. Next: Svelte and Vue bindings. Then: publish 0.1 to npm. After: a gallery and guides. Quick start: npm create @orreryjs@latest my-world."></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mrigankad/Orrery/main/docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: seven packages (core, devtools, physics, UI and keyboard, ECS, React, the starter) and npx orreryjs doctor, with 62 tests. Next: Svelte and Vue bindings. Live on npm as @orreryjs 0.1.0. Then: release notes. After: a gallery and guides. Quick start: npm create @orreryjs@latest my-world."></p>
 
 ## Develop
 
