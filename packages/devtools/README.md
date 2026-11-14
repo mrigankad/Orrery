@@ -3,7 +3,7 @@
 Devtools for [Orrery](https://github.com/mrigankad/Orrery) worlds: a frame graph with budgets, GPU memory with a leak check, a live scene tree and an inspector.
 
 ```js
-import { World } from 'orreryjs';
+import { World } from '@orreryjs/core';
 import { mountDevtools } from '@orreryjs/devtools';
 
 const world = await World.create( { container } );

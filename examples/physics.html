@@ -37,7 +37,7 @@
 			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
 			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
 			"@dimforge/rapier3d-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.21.0/dist/rapier.mjs",
-			"orreryjs": "../packages/core/src/index.js",
+			"@orreryjs/core": "../packages/core/src/index.js",
 			"@orreryjs/devtools": "../packages/devtools/src/index.js",
 			"@orreryjs/physics": "../packages/physics/src/index.js"
 		} }
@@ -63,7 +63,7 @@
 
 	<script type="module">
 		import { BoxGeometry, DodecahedronGeometry, Mesh, MeshStandardMaterial, SphereGeometry } from 'three';
-		import { World, addOrbitControls } from 'orreryjs';
+		import { World, addOrbitControls } from '@orreryjs/core';
 		import { addPhysics } from '@orreryjs/physics';
 		import { mountDevtools } from '@orreryjs/devtools';
 

@@ -185,11 +185,11 @@ function runDoctor( root ) {
 
 	// 5. Orrery packages aligned
 	const deps = { ...pkg?.dependencies, ...pkg?.devDependencies };
-	const orrery = Object.keys( deps ).filter( ( n ) => n === 'orreryjs' || n.startsWith( '@orreryjs/' ) );
+	const orrery = Object.keys( deps ).filter( ( n ) => n === '@orreryjs/core' || n.startsWith( '@orreryjs/' ) );
 	const installed = orrery.map( ( n ) => ( { name: n, version: readJSON( join( root, 'node_modules', ...n.split( '/' ), 'package.json' ) )?.version } ) ).filter( ( p ) => p.version );
 	const minors = new Set( installed.map( ( p ) => p.version.split( '.' ).slice( 0, 2 ).join( '.' ) ) );
 
-	if ( minors.size > 1 ) add( 'orrery', 'warn', 'Orrery packages are on different versions', installed.map( ( p ) => `${ p.name }@${ p.version }` ).join( '\n' ), 'Install the same minor version of every orreryjs package.' );
+	if ( minors.size > 1 ) add( 'orrery', 'warn', 'Orrery packages are on different versions', installed.map( ( p ) => `${ p.name }@${ p.version }` ).join( '\n' ), 'Install the same minor version of every Orrery package.' );
 	else if ( installed.length ) add( 'orrery', 'pass', `${ installed.length } Orrery package${ installed.length > 1 ? 's' : '' } aligned` );
 
 	return { ok: ! checks.some( ( c ) => c.status === 'fail' ), checks };

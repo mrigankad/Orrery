@@ -37,7 +37,7 @@
 			"three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
 			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
 			"three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
-			"orreryjs": "../packages/core/src/index.js",
+			"@orreryjs/core": "../packages/core/src/index.js",
 			"@orreryjs/devtools": "../packages/devtools/src/index.js",
 			"@orreryjs/ui": "../packages/ui/src/index.js",
 			"@orreryjs/ecs": "../packages/ecs/src/index.js"
@@ -63,7 +63,7 @@
 
 	<script type="module">
 		import { DodecahedronGeometry, SRGBColorSpace, CanvasTexture, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, SphereGeometry, DoubleSide } from 'three';
-		import { World, addOrbitControls } from 'orreryjs';
+		import { World, addOrbitControls } from '@orreryjs/core';
 		import { mountDevtools } from '@orreryjs/devtools';
 		import { createUI } from '@orreryjs/ui';
 		import { createECS } from '@orreryjs/ecs';

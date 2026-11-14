@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "test": "npm test --workspaces --if-present",
-    "typecheck": "npm run typecheck -w orreryjs",
+    "typecheck": "npm run typecheck -w @orreryjs/core",
     "dev": "node scripts/serve.mjs",
     "doctor": "node packages/core/bin/orreryjs.js doctor",
     "ci:doctor": "node packages/core/bin/orreryjs.js doctor"

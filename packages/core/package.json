@@ -1,5 +1,5 @@
 {
-  "name": "orreryjs",
+  "name": "@orreryjs/core",
   "version": "0.1.0",
   "description": "Batteries for three.js: a World on WebGPU with WebGL fallback, one load() for glTF/KTX2/HDR, auto-dispose and object events. Bring your own three.",
   "type": "module",

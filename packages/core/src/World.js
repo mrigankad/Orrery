@@ -29,7 +29,7 @@ const POINTER_TYPES = [ 'click', 'pointerenter', 'pointerleave', 'pointerdown', 
  * - Warns once when it renders lit materials with no light at all.
  *
  * ```js
- * import { World } from 'orreryjs';
+ * import { World } from '@orreryjs/core';
  * const world = new World( { container: document.querySelector( '#app' ) } );
  * world.add( mesh );
  * world.on( mesh, 'click', () => mesh.scale.multiplyScalar( 1.1 ) );

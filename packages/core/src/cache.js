@@ -7,7 +7,7 @@
  * this is a lightweight, loader-agnostic way to add that.
  *
  * ```js
- * import { memoizeLoader, loadGLTF } from 'orreryjs';
+ * import { memoizeLoader, loadGLTF } from '@orreryjs/core';
  *
  * const loadModel = memoizeLoader( loadGLTF );
  * const [ a, b ] = await Promise.all( [ loadModel( url ), loadModel( url ) ] ); // one fetch

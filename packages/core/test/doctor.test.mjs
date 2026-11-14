@@ -35,12 +35,12 @@ test( 'addonImports and threeRevision parse what they should', () => {
 test( 'a broken project: old three, a duplicate copy, a removed addon, mismatched types', () => {
 
 	const root = project( {
-		'package.json': { dependencies: { three: '0.183.0', orreryjs: '0.1.0', '@orreryjs/ui': '0.2.0' } },
+		'package.json': { dependencies: { three: '0.183.0', '@orreryjs/core': '0.1.0', '@orreryjs/ui': '0.2.0' } },
 		'node_modules/three/package.json': { name: 'three', version: '0.183.0' },
 		'node_modules/three/examples/jsm/loaders/GLTFLoader.js': '',
 		'node_modules/some-viewer/node_modules/three/package.json': { name: 'three', version: '0.160.0' },
 		'node_modules/@types/three/package.json': { version: '0.180.0' },
-		'node_modules/orreryjs/package.json': { version: '0.1.0' },
+		'node_modules/@orreryjs/core/package.json': { version: '0.1.0' },
 		'node_modules/@orreryjs/ui/package.json': { version: '0.2.0' },
 		'src/main.js': `import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';\nimport { RGBELoader } from 'three/addons/loaders/RGBELoader.js';`,
 		'node_modules/ignored/index.js': `import 'three/addons/not/scanned.js'`,
@@ -79,10 +79,10 @@ import 'three/addons/also/skipped.js'`
 test( 'a healthy project passes', () => {
 
 	const root = project( {
-		'package.json': { dependencies: { three: '0.184.0', orreryjs: '0.1.0' } },
+		'package.json': { dependencies: { three: '0.184.0', '@orreryjs/core': '0.1.0' } },
 		'node_modules/three/package.json': { name: 'three', version: '0.184.0' },
 		'node_modules/three/examples/jsm/loaders/HDRLoader.js': '',
-		'node_modules/orreryjs/package.json': { version: '0.1.0' },
+		'node_modules/@orreryjs/core/package.json': { version: '0.1.0' },
 		'src/app.ts': `import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';`
 	} );
 

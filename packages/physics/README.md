@@ -3,7 +3,7 @@
 [Rapier](https://rapier.rs) physics for [Orrery](https://github.com/mrigankad/Orrery) worlds. Colliders are built from your meshes, the simulation runs on a fixed step inside the world loop, and bodies go away when their object leaves the scene.
 
 ```js
-import { World } from 'orreryjs';
+import { World } from '@orreryjs/core';
 import { addPhysics } from '@orreryjs/physics';
 
 const world = await World.create( { container } );

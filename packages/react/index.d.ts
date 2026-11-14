@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { Object3D, Intersection } from 'three';
-import type { World, WorldConfig, WorldPointerEvent } from 'orreryjs';
+import type { World, WorldConfig, WorldPointerEvent } from '@orreryjs/core';
 
 export interface OrreryCanvasProps {
 	options?: WorldConfig & { renderer?: 'auto' | 'webgl2' | 'webgl' };

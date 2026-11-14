@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/readme/01-hero.png" alt="Orrery, batteries for three.js. Headline: Wind up a world. Watch it run. A small layer on three.js that lights your scene, frees GPU memory, gives objects click events and runs on WebGPU with WebGL as a fallback. Install with npm i orreryjs three. Beside it, a live render of the Orrery demo: an orange sun with planets on orbit rings."></p>
+<p align="center"><img src="docs/readme/01-hero.png" alt="Orrery, batteries for three.js. Headline: Wind up a world. Watch it run. A small layer on three.js that lights your scene, frees GPU memory, gives objects click events and runs on WebGPU with WebGL as a fallback. Install with npm i @orreryjs/core three. Beside it, a live render of the Orrery demo: an orange sun with planets on orbit rings."></p>
 
 <p align="center">
   <a href="https://mrigankad.github.io/Orrery/"><b>Live demo</b></a> ·
@@ -12,17 +12,17 @@
 
 <p align="center"><img src="docs/readme/03-load-gpu.png" alt="One load for every file and the best GPU path picked for you. world.load picks the loader from the extension: glb and gltf with Draco, KTX2 and Meshopt wired in, ktx2 Basis textures, hdr environments, and png, jpg or webp textures in sRGB, with aggregate progress. World.create uses WebGPU when the browser supports it, falls back to WebGL 2 automatically, and new World gives the classic WebGL renderer."></p>
 
-<p align="center"><img src="docs/readme/03b-batteries.png" alt="The batteries, each a small package: @orreryjs/devtools with a frame graph, GPU memory leak check, scene tree and inspector; @orreryjs/physics with Rapier colliders from your meshes; @orreryjs/ui for labels and keyboard access; @orreryjs/ecs for traits and systems; @orreryjs/react for plain three.js in hooks; plus npm create orreryjs, npx orreryjs doctor and automatic recovery when the GPU driver resets."></p>
+<p align="center"><img src="docs/readme/03b-batteries.png" alt="The batteries, each a small package: @orreryjs/devtools with a frame graph, GPU memory leak check, scene tree and inspector; @orreryjs/physics with Rapier colliders from your meshes; @orreryjs/ui for labels and keyboard access; @orreryjs/ecs for traits and systems; @orreryjs/react for plain three.js in hooks; plus npm create @orreryjs, npx orreryjs doctor and automatic recovery when the GPU driver resets."></p>
 
 ## Quick start
 
 ```sh
-npm i orreryjs three
+npm i @orreryjs/core three
 ```
 
 ```js
 import { BoxGeometry, Mesh, MeshStandardMaterial } from 'three';
-import { World } from 'orreryjs';
+import { World } from '@orreryjs/core';
 
 const world = await World.create( { container: document.querySelector( '#app' ) } );
 
@@ -124,7 +124,7 @@ Checks that three is installed and new enough, that there is only one copy of th
 
 ## Roadmap
 
-<p align="center"><img src="docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: seven packages (core, devtools, physics, UI and keyboard, ECS, React, the starter) and npx orreryjs doctor, with 62 tests. Next: Svelte and Vue bindings. Then: publish 0.1 to npm. After: a gallery and guides. Quick start: npm create orreryjs@latest my-world."></p>
+<p align="center"><img src="docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: seven packages (core, devtools, physics, UI and keyboard, ECS, React, the starter) and npx orreryjs doctor, with 62 tests. Next: Svelte and Vue bindings. Then: publish 0.1 to npm. After: a gallery and guides. Quick start: npm create @orreryjs@latest my-world."></p>
 
 ## Develop
 

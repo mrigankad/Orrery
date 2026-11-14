@@ -9,7 +9,7 @@
   "files": ["src", "index.d.ts", "README.md", "LICENSE"],
   "sideEffects": false,
   "scripts": { "test": "node --test \"test/*.test.mjs\"" },
-  "peerDependencies": { "three": ">=0.184.0", "orreryjs": ">=0.1.0" },
+  "peerDependencies": { "three": ">=0.184.0", "@orreryjs/core": ">=0.1.0" },
   "devDependencies": { "three": "^0.184.0" },
   "repository": { "type": "git", "url": "git+https://github.com/mrigankad/Orrery.git", "directory": "packages/ecs" },
   "homepage": "https://mrigankad.github.io/Orrery/",

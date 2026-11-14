@@ -1,12 +1,32 @@
 {
-  "name": "create-orreryjs",
+  "name": "@orreryjs/create",
   "version": "0.1.0",
-  "description": "Start an Orrery + Vite project: npm create orreryjs@latest my-world",
+  "description": "Start an Orrery + Vite project: npm create @orreryjs@latest my-world",
   "type": "module",
-  "bin": { "create-orreryjs": "bin/index.js" },
-  "files": ["bin", "src", "template", "README.md", "LICENSE"],
-  "scripts": { "test": "node --test \"test/*.test.mjs\"" },
-  "repository": { "type": "git", "url": "git+https://github.com/mrigankad/Orrery.git", "directory": "packages/create-orreryjs" },
-  "keywords": ["three", "threejs", "orrery", "starter", "vite"],
+  "bin": {
+    "create-orreryjs": "bin/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "template",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrigankad/Orrery.git",
+    "directory": "packages/create-orreryjs"
+  },
+  "keywords": [
+    "three",
+    "threejs",
+    "orrery",
+    "starter",
+    "vite"
+  ],
   "license": "MIT"
 }

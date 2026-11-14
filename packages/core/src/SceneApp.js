@@ -12,7 +12,7 @@ import { ResizeManager } from './ResizeManager.js';
  * loop) into a few lines.
  *
  * ```js
- * import { SceneApp } from 'orreryjs';
+ * import { SceneApp } from '@orreryjs/core';
  *
  * const app = new SceneApp( { container: document.body } );
  * app.scene.add( myMesh );

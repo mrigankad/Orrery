@@ -1,5 +1,5 @@
 import { createContext, createElement, useContext, useEffect, useRef, useState } from 'react';
-import { World } from 'orreryjs';
+import { World } from '@orreryjs/core';
 
 const WorldContext = createContext( null );
 

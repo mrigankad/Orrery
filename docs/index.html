@@ -95,7 +95,7 @@
 		<div class="tabs"><a href="#introduction" aria-current="page">Docs</a><a href="../examples/">Examples</a><a href="#packages">Packages</a></div>
 		<div class="right">
 			<label class="search"><span class="visually-hidden" hidden>Search docs</span><input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off" /><kbd>/</kbd></label>
-			<button class="pill" id="install" title="Copy install command">npm i <span>orreryjs</span> three</button>
+			<button class="pill" id="install" title="Copy install command">npm i <span>@orreryjs/core</span> three</button>
 			<a href="https://github.com/mrigankad/Orrery">GitHub</a>
 			<button class="theme" id="theme" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
 		</div>
@@ -127,7 +127,7 @@
 				<h1>Batteries for three.js</h1>
 				<p class="lede">Orrery is a small layer on three.js. It lights your scene, frees GPU memory when you remove things, gives objects click events and runs on WebGPU with a WebGL fallback. three stays a peer dependency, so you keep using it directly.</p>
 				<div class="pair">
-					<pre><code>npm i orreryjs three
+					<pre><code>npm i @orreryjs/core three
 
 <span class="c"># optional packages</span>
 npm i @orreryjs/devtools @orreryjs/physics
@@ -141,11 +141,11 @@ npm i @orreryjs/ui @orreryjs/ecs @orreryjs/react</code></pre>
 				<p class="eyebrow">Start · Quick start</p>
 				<h2>Quick start</h2>
 				<p>Start a new project with the starter, or add Orrery to an existing one.</p>
-				<pre><code>npm create orreryjs@latest my-world
+				<pre><code>npm create @orreryjs@latest my-world
 cd my-world && npm install && npm run dev</code></pre>
 				<h3 id="by-hand">By hand</h3>
 				<pre><code><span class="k">import</span> { BoxGeometry, Mesh, MeshStandardMaterial } <span class="k">from</span> <span class="s">'three'</span>;
-<span class="k">import</span> { World } <span class="k">from</span> <span class="s">'orreryjs'</span>;
+<span class="k">import</span> { World } <span class="k">from</span> <span class="s">'@orreryjs/core'</span>;
 
 <span class="k">const</span> world = <span class="k">await</span> World.create( { container: document.querySelector( <span class="s">'#app'</span> ) } );
 <span class="k">const</span> cube = <span class="k">new</span> Mesh( <span class="k">new</span> BoxGeometry(), <span class="k">new</span> MeshStandardMaterial( { color: 0xff4f1a } ) );
@@ -298,7 +298,7 @@ ecs.system( ( dt ) =&gt; { <span class="k">for</span> ( <span class="k">const</s
 
 		document.getElementById( 'install' ).onclick = async ( e ) => {
 			const btn = e.currentTarget, html = btn.innerHTML;
-			try { await navigator.clipboard.writeText( 'npm i orreryjs three' ); btn.textContent = 'Copied'; } catch { btn.textContent = 'npm i orreryjs three'; }
+			try { await navigator.clipboard.writeText( 'npm i @orreryjs/core three' ); btn.textContent = 'Copied'; } catch { btn.textContent = 'npm i @orreryjs/core three'; }
 			setTimeout( () => ( btn.innerHTML = html ), 1200 );
 		};
 

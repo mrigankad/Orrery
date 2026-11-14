@@ -1,5 +1,5 @@
 import { Group, Mesh, MeshStandardMaterial, SphereGeometry } from 'three';
-import { World, addOrbitControls } from 'orreryjs';
+import { World, addOrbitControls } from '@orreryjs/core';
 import { mountDevtools } from '@orreryjs/devtools';
 
 // A World is a scene, camera, renderer and loop, lit and on WebGPU when available.

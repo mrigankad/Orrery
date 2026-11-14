@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const TEMPLATE = fileURLToPath( new URL( '../template', import.meta.url ) );
 
 /** Versions the starter installs, kept in one place so releases bump them together. */
-const VERSIONS = { orreryjs: '^0.1.0', '@orreryjs/devtools': '^0.1.0', three: '^0.184.0', vite: '^6.0.0' };
+const VERSIONS = { '@orreryjs/core': '^0.1.0', '@orreryjs/devtools': '^0.1.0', three: '^0.184.0', vite: '^6.0.0' };
 
 /**
  * Turns a folder name into a valid npm package name.
@@ -50,7 +50,7 @@ function scaffold( name, { cwd = process.cwd(), force = false, versions = {} } =
 		version: '0.0.0',
 		type: 'module',
 		scripts: { dev: 'vite', build: 'vite build', preview: 'vite preview', doctor: 'orreryjs doctor' },
-		dependencies: { orreryjs: v.orreryjs, '@orreryjs/devtools': v[ '@orreryjs/devtools' ], three: v.three },
+		dependencies: { '@orreryjs/core': v[ '@orreryjs/core' ], '@orreryjs/devtools': v[ '@orreryjs/devtools' ], three: v.three },
 		devDependencies: { vite: v.vite }
 	};
 

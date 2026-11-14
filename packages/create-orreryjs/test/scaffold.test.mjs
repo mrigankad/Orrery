@@ -21,7 +21,7 @@ test( 'scaffold writes a Vite project and refuses to overwrite', () => {
 		const { dir, pkg } = scaffold( 'My World', { cwd } );
 		for ( const f of [ 'index.html', 'src/main.js', 'package.json', 'vite.config.js', '.gitignore', 'README.md' ] ) assert.ok( existsSync( join( dir, f ) ), f );
 		assert.equal( pkg.name, 'my-world' );
-		assert.ok( pkg.dependencies.orreryjs && pkg.dependencies.three && pkg.devDependencies.vite );
+		assert.ok( pkg.dependencies[ '@orreryjs/core' ] && pkg.dependencies.three && pkg.devDependencies.vite );
 		assert.match( readFileSync( join( dir, 'index.html' ), 'utf8' ), /<title>My World<\/title>/ );
 		assert.match( readFileSync( join( dir, 'src/main.js' ), 'utf8' ), /World\.create/ );
 
