@@ -5,7 +5,8 @@ All packages share one version. Orrery follows semver from 1.0; before that, min
 ## Unreleased
 
 - `@orreryjs/svelte` and `@orreryjs/vue` bindings.
-- CI also runs the tests against the newest three.js release, so upstream breaking changes show up before users hit them.
+- CI also runs the tests, type check and doctor against the newest three.js release (weekly and on every push), so upstream breaking changes show up before users hit them. `node scripts/use-three.mjs <version>` does the same locally.
+- Checked: 0.1.0 works unchanged with three r187 (all tests, types and doctor pass; the demo renders on WebGPU in Chrome).
 
 ## 0.1.0 · 2026-11-14
 

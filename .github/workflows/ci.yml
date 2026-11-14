@@ -1,13 +1,35 @@
 name: ci
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1'   # Mondays: catch new three.js releases early
+  workflow_dispatch:
+
 jobs:
   test:
+    name: tests (three ${{ matrix.three }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        three: [ pinned, latest ]
+    # The latest-three job is an early warning: it reports, it does not block.
+    continue-on-error: ${{ matrix.three == 'latest' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci
+      - name: Use the newest three.js
+        if: matrix.three == 'latest'
+        # Rewrites every workspace manifest to the newest three so there is a
+        # single copy (npm overrides cannot replace direct dependencies).
+        run: |
+          node scripts/use-three.mjs latest
+          rm -f package-lock.json
+          npm install --no-audit --no-fund
+          npm ls three
       - run: npm test
       - run: npm run typecheck
       - run: npm run doctor
