@@ -148,7 +148,7 @@ function mountDevtools( world, options = {} ) {
 	const offLost = world.onGpuLost?.( ( info ) => {
 
 		const badge = $( 'backend' );
-		badge.textContent = 'GPU lost';
+		badge.textContent = info.recovering ? 'GPU lost · recovering' : 'GPU lost';
 		badge.classList.add( 'lost' );
 		badge.title = `${ info.reason }${ info.message ? ': ' + info.message : '' }`;
 
@@ -428,6 +428,15 @@ function mountDevtools( world, options = {} ) {
 	};
 
 	world.renderer.domElement.addEventListener( 'click', onCanvasClick, true );
+	const offRenderer = world.onRendererChange?.( ( next, prev ) => {
+
+		prev.domElement.removeEventListener( 'click', onCanvasClick, true );
+		next.domElement.addEventListener( 'click', onCanvasClick, true );
+		const badge = $( 'backend' );
+		badge.classList.remove( 'lost' );
+		badge.textContent = `${ BACKEND_LABEL[ world.backend ] ?? 'GPU' } · recovered`;
+
+	} );
 
 	// ---- toggle -------------------------------------------------------------
 
@@ -463,6 +472,7 @@ function mountDevtools( world, options = {} ) {
 			clearInterval( hudTimer );
 			offUpdate?.();
 			offLost?.();
+			offRenderer?.();
 			window.removeEventListener( 'keydown', onKey );
 			world.renderer.domElement.removeEventListener( 'click', onCanvasClick, true );
 			el.remove();

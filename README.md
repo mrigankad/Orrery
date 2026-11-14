@@ -49,7 +49,8 @@ If you use three's WebGPU build through an import map, also map `three/webgpu`. 
 | `world.assets.onProgress(fn)` | `{ url, loaded, total, done }` across every load |
 | `world.optimize(root?)` | Folds meshes sharing geometry and material into InstancedMeshes (300 rocks: 300 draw calls to 1). Meshes with events are kept |
 | `adaptive: true` | Lowers resolution when frames run over budget, raises it back with headroom. `world.resolutionScale` |
-| `world.onGpuLost(fn)` | WebGPU device loss or WebGL context loss, reported once as `{ api, reason, message }` |
+| `world.onGpuLost(fn)` | WebGPU device loss or WebGL context loss. By default a lost WebGPU device is replaced by the WebGL 2 backend and the scene keeps running (`recover: false` to opt out); `world.onRendererChange(fn)` fires on the swap |
+| `world.frame` | Frames rendered since start |
 | `world.onUpdate(fn)` / `start()` / `stop()` / `dispose()` | Frame loop and lifecycle |
 | Config | `lights: 'studio' \| 'none'`, `environment: 'room' \| 'none'`, `toneMapping`, `warnings`, `fov`, `near`, `far` |
 
@@ -93,6 +94,31 @@ world.add( ui.text( 'orrery' ) );         // text as a mesh, WebGPU and WebGL
 
 Labels are real DOM: sharp at any zoom, readable by screen readers, sorted by depth, dimmed when something is in front. On the [demo](https://mrigankad.github.io/Orrery/), press Tab to move through the planets.
 
+## Systems (optional ECS)
+
+```js
+import { createECS, Not } from '@orreryjs/ecs';
+
+const ecs = createECS( world );
+const Spin = ecs.trait( { speed: 1 }, 'Spin' );
+const Paused = ecs.trait( {}, 'Paused' );
+
+ecs.add( planet, Spin( { speed: 0.4 } ) );
+ecs.system( function spin( dt ) {
+	for ( const [ object, s ] of ecs.each( Spin, Not( Paused ) ) ) object.rotation.y += s.speed * dt;
+} );
+```
+
+Entities are your Object3Ds. Queries are cached and live, systems run in order with timings, and entities drop out when their object leaves the scene. The demo's orbits run this way.
+
+## Upgrade check
+
+```sh
+npx orreryjs doctor
+```
+
+Checks that three is installed and new enough, that there is only one copy of three, that every `three/addons` import in your code still exists (with the replacement for renamed ones, such as RGBELoader to HDRLoader), that `@types/three` matches, and that Orrery packages are aligned. Exits non-zero on problems, `--json` for CI.
+
 ## Roadmap
 
 <p align="center"><img src="docs/readme/04-roadmap.png" alt="Small core, batteries you can add. Shipped: orreryjs core. Next: @orreryjs/devtools with a scene inspector, perf HUD, GPU memory view and upgrade codemods. Then: physics, UI and ECS packages. And: React, Svelte and Vue bindings with a docs site and a starter."></p>
@@ -102,7 +128,7 @@ Labels are real DOM: sharp at any zoom, readable by screen readers, sorted by de
 ```sh
 npm install
 npm run dev        # demo on http://127.0.0.1:5173  (?renderer=webgl2 or ?renderer=webgl)
-npm test           # node --test, 47 tests across four packages (physics runs real Rapier)
+npm test           # node --test, 56 tests across five packages (physics runs real Rapier)
 npm run typecheck
 ```
 

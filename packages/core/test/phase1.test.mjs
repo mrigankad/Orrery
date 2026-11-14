@@ -144,10 +144,52 @@ test( 'onGpuLost fires once for a lost WebGPU device and late subscribers still 
 
 	assert.equal( threeHandled, 2, "three's own handler still runs" );
 	assert.equal( seen.length, 1 );
-	assert.deepEqual( seen[ 0 ], { api: 'webgpu', reason: 'unknown', message: 'DXGI_ERROR_DEVICE_HUNG' } );
+	assert.deepEqual( seen[ 0 ], { api: 'webgpu', reason: 'unknown', message: 'DXGI_ERROR_DEVICE_HUNG', recovering: false } );
 
 	const late = [];
 	world.onGpuLost( ( info ) => late.push( info ) );
 	assert.equal( late.length, 1 );
+
+} );
+
+test( 'a lost WebGPU device is replaced by the WebGL 2 backend once, and the loop keeps going', async () => {
+
+	const make = ( name ) => ( {
+		name, isWebGPURenderer: true, backend: name === 'webgpu' ? { isWebGPUBackend: true } : { isWebGLBackend: true },
+		domElement: { name, parentNode: null, style: {}, addEventListener() {}, removeEventListener() {} },
+		toneMapping: 7, outputColorSpace: 'srgb', disposed: false,
+		setSize() {}, setPixelRatio() {}, render() {}, dispose() { this.disposed = true; },
+		getClearColor( c ) { return c.set( 0xffffff ); }, getClearAlpha() { return 0; }, setClearColor( c, a ) { this.clear = [ c.getHex(), a ]; },
+		onDeviceLost() {}
+	} );
+
+	const first = make( 'webgpu' );
+	const world = await World.create( { container: null, createRenderer: () => first, warnings: false, environment: 'none' } );
+	world._makeRenderer = async ( forceWebGL ) => { assert.equal( forceWebGL, true ); return make( 'webgl2' ); };
+	world._resize._measure = () => ( { width: 10, height: 10 } );
+
+	const swaps = [];
+	world.onRendererChange( ( next, prev ) => swaps.push( [ prev.name, next.name ] ) );
+	world._loop.start = function () { this._running = true; return this; };
+	world._loop.stop = function () { this._running = false; return this; };
+	world._resize.start = world._resize.stop = () => world._resize;
+	world.start();
+
+	first.onDeviceLost( { reason: 'unknown', message: 'hung' } );
+	await new Promise( ( r ) => setTimeout( r, 0 ) );
+
+	assert.deepEqual( swaps, [ [ 'webgpu', 'webgl2' ] ] );
+	assert.equal( world.backend, 'webgl2' );
+	assert.equal( first.disposed, true );
+	assert.deepEqual( world.renderer.clear, [ 0xffffff, 0 ], 'clear colour carried over' );
+	assert.equal( world.renderer.toneMapping, 7 );
+	assert.equal( world._loop.running, true );
+	assert.equal( world.gpuLost, null );
+
+	// A second loss does not loop.
+	world.renderer.onDeviceLost( { reason: 'unknown' } );
+	await new Promise( ( r ) => setTimeout( r, 0 ) );
+	assert.equal( swaps.length, 1 );
+	assert.equal( world.gpuLost.recovering, false );
 
 } );

@@ -1,4 +1,5 @@
 import {
+	Color,
 	NeutralToneMapping,
 	PMREMGenerator,
 	Raycaster,
@@ -60,10 +61,18 @@ class World extends SceneApp {
 		if ( renderer === 'webgl' || config.createRenderer ) return new World( config );
 
 		const webgpu = await import( 'three/webgpu' );
-		const instance = new webgpu.WebGPURenderer( { antialias, forceWebGL: renderer === 'webgl2' } );
-		await instance.init();
+		const makeRenderer = async ( forceWebGL ) => {
 
-		return new World( { ...config, createRenderer: () => instance, PMREMGenerator: webgpu.PMREMGenerator } );
+			const r = new webgpu.WebGPURenderer( { antialias, forceWebGL } );
+			await r.init();
+			return r;
+
+		};
+
+		const instance = await makeRenderer( renderer === 'webgl2' );
+		const world = new World( { ...config, createRenderer: () => instance, PMREMGenerator: webgpu.PMREMGenerator } );
+		world._makeRenderer = makeRenderer;
+		return world;
 
 	}
 
@@ -80,6 +89,9 @@ class World extends SceneApp {
 		} = config;
 
 		this.warnings = warnings;
+
+		/** Frames rendered since start. @type {number} */
+		this.frame = 0;
 
 		/**
 		 * Adaptive resolution controller, or null when off. Enable with
@@ -104,32 +116,17 @@ class World extends SceneApp {
 		// is dimmed to add shape without blowing out the exposure.
 		this.lights = lights === 'studio' ? addStudioLighting( this.scene, { intensity: useRoom ? 0.35 : 1 } ) : null;
 
-		if ( useRoom ) {
-
-			const pmrem = new PMREM( this.renderer );
-			const room = new RoomEnvironment();
-			this.scene.environment = pmrem.fromScene( room, 0.04 ).texture;
-			this.scene.environmentIntensity = 0.6;
-			room.dispose();
-			pmrem.dispose();
-
-		}
+		this._PMREM = useRoom ? PMREM : null;
+		this._toneMapping = toneMapping;
+		this.recover = config.recover ?? true;
+		this._rendererCallbacks = new Set();
+		if ( useRoom ) this._buildEnvironment();
 
 		// GPU loss: WebGPU device lost, or WebGL context lost. Reported once
 		// through world.onGpuLost() and world.gpuLost.
 		this.gpuLost = null;
 		this._lostCallbacks = new Set();
-		if ( typeof this.renderer.onDeviceLost === 'function' ) {
-
-			const original = this.renderer.onDeviceLost;
-			this.renderer.onDeviceLost = ( info ) => {
-
-				original.call( this.renderer, info );
-				this._reportGpuLost( { api: 'webgpu', reason: info?.reason ?? 'unknown', message: info?.message ?? '' } );
-
-			};
-
-		}
+		this._installLossHandler();
 
 		this._onContextLost = ( event ) => this._reportGpuLost( { api: 'webgl', reason: 'context-lost', message: event?.statusMessage ?? '' } );
 		if ( this.renderer.isWebGLRenderer ) this.renderer.domElement?.addEventListener?.( 'webglcontextlost', this._onContextLost );
@@ -156,6 +153,20 @@ class World extends SceneApp {
 
 	}
 
+	_installLossHandler() {
+
+		const renderer = this.renderer;
+		if ( typeof renderer.onDeviceLost !== 'function' ) return;
+		const original = renderer.onDeviceLost;
+		renderer.onDeviceLost = ( info ) => {
+
+			original.call( renderer, info );
+			if ( renderer === this.renderer ) this._reportGpuLost( { api: 'webgpu', reason: info?.reason ?? 'unknown', message: info?.message ?? '' } );
+
+		};
+
+	}
+
 	/**
 	 * Called once if the GPU device (WebGPU) or context (WebGL) is lost, for
 	 * example after a driver reset. Receives `{ api, reason, message }`.
@@ -174,9 +185,77 @@ class World extends SceneApp {
 	_reportGpuLost( info ) {
 
 		if ( this.gpuLost ) return;
-		this.gpuLost = info;
-		if ( this.warnings ) console.warn( `Orrery: the GPU ${ info.api === 'webgpu' ? 'device' : 'context' } was lost (${ info.reason }). Reload the page or recreate the World.` );
-		for ( const fn of [ ...this._lostCallbacks ] ) fn( info );
+		const canRecover = this.recover && info.api === 'webgpu' && typeof this._makeRenderer === 'function' && ! this.recovered;
+		this.gpuLost = { ...info, recovering: canRecover };
+
+		if ( this.warnings ) {
+
+			console.warn( canRecover
+				? `Orrery: the GPU device was lost (${ info.reason }). Switching to the WebGL 2 backend.`
+				: `Orrery: the GPU ${ info.api === 'webgpu' ? 'device' : 'context' } was lost (${ info.reason }). Reload the page or recreate the World.` );
+
+		}
+
+		for ( const fn of [ ...this._lostCallbacks ] ) fn( this.gpuLost );
+		if ( canRecover ) this._recoverRenderer().catch( ( error ) => console.error( 'Orrery: recovery failed.', error ) );
+
+	}
+
+	_buildEnvironment() {
+
+		const pmrem = new this._PMREM( this.renderer );
+		const room = new RoomEnvironment();
+		this.scene.environment = pmrem.fromScene( room, 0.04 ).texture;
+		this.scene.environmentIntensity = 0.6;
+		room.dispose();
+		pmrem.dispose();
+
+	}
+
+	/**
+	 * Replaces a lost WebGPU renderer with WebGPURenderer's WebGL 2 backend and
+	 * carries on. Scene objects are renderer-independent, so geometries,
+	 * materials and textures upload again on the next frame.
+	 */
+	async _recoverRenderer() {
+
+		const old = this.renderer;
+		const wasRunning = this._loop.running;
+		this.stop();
+
+		const next = await this._makeRenderer( true );
+		if ( old.getClearColor ) next.setClearColor( old.getClearColor( new Color() ), old.getClearAlpha() );
+		next.toneMapping = old.toneMapping;
+		next.outputColorSpace = old.outputColorSpace;
+
+		const parent = old.domElement.parentNode;
+		if ( parent ) parent.replaceChild( next.domElement, old.domElement );
+
+		this.renderer = next;
+		this._resize.renderer = next;
+		this._resize.update();
+		this._installLossHandler();
+		if ( this._PMREM ) this._buildEnvironment();
+		try { old.dispose(); } catch { /* the old device is gone */ }
+
+		this.gpuLost = null;
+		this.recovered = ( this.recovered ?? 0 ) + 1;
+		for ( const fn of [ ...this._rendererCallbacks ] ) fn( next, old );
+		if ( wasRunning ) this.start();
+
+	}
+
+	/**
+	 * Called with `(renderer, previous)` when the World swaps its renderer, for
+	 * example after recovering from a lost GPU device.
+	 *
+	 * @param {Function} fn
+	 * @return {Function} Unsubscribe.
+	 */
+	onRendererChange( fn ) {
+
+		this._rendererCallbacks.add( fn );
+		return () => this._rendererCallbacks.delete( fn );
 
 	}
 
@@ -454,6 +533,7 @@ class World extends SceneApp {
 
 		}
 
+		this.frame ++;
 		super._tick( delta, elapsed );
 		if ( this.warnings && ! this._warned.has( 'unlit' ) ) this._checkUnlit();
 

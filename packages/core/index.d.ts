@@ -230,3 +230,10 @@ export interface World {
 	emit( object: Object3D, type: WorldPointerEvent, hit?: Intersection | null ): void;
 	hasListener( object: Object3D, type?: WorldPointerEvent ): boolean;
 }
+export interface WorldConfig { /** Rebuild on the WebGL 2 backend when a WebGPU device is lost. Default true. */ recover?: boolean; }
+export interface World {
+	readonly frame: number;
+	recover: boolean;
+	readonly recovered?: number;
+	onRendererChange( fn: ( renderer: any, previous: any ) => void ): () => void;
+}
